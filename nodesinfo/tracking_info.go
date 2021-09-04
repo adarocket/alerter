@@ -1,9 +1,9 @@
 package nodesinfo
 
 import (
+	"github.com/adarocket/alerter/cache"
 	"github.com/adarocket/alerter/client"
 	"github.com/adarocket/alerter/inform"
-	"github.com/adarocket/proto/proto-gen/cardano"
 	"google.golang.org/grpc"
 	"log"
 )
@@ -21,9 +21,13 @@ func StartTracking() {
 		return
 	}
 
-	a, _ := GetNewCardanoNodes()
-	for _, request := range a {
-		inform.CheckNodes(request)
+	if nodes, err := GetNodes(); err == nil {
+		for _, request := range nodes {
+			inform.CheckNodes(request)
+		}
+
+		cacheInstance := cache.GetCacheInstance()
+		cacheInstance.AddNewInform(nodes)
 	}
 
 	/*for _ = range time.Tick(time.Second * timeout) {
@@ -70,27 +74,27 @@ func setupInterceptorAndClient(accessToken string) {
 }
 
 func authMethods() map[string]bool {
-	const informerServicePath = "/cardano.Cardano/"
+	//const informerServicePath = "/Common.Controller/"
 
 	return map[string]bool{
-		informerServicePath + "GetStatistic": true,
-		informerServicePath + "GetNodeList":  true,
+		"/cardano.Cardano/" + "GetStatistic":  true, //cardano.Cardano
+		"/Common.Controller/" + "GetNodeList": true, //Common.Controller
 	}
 }
 
-func GetNewCardanoNodes() (map[string]*cardano.SaveStatisticRequest, error) {
+func GetNodes() (map[string]interface{}, error) {
 	resp, err := informClient.GetNodeList()
 	if err != nil {
 		log.Println(err)
-		return map[string]*cardano.SaveStatisticRequest{}, err
+		return nil, err
 	}
-	//Statistics.
-	cardanoNodes := make(map[string]*cardano.SaveStatisticRequest, 10)
+
+	cardanoNodes := make(map[string]interface{}, 10)
 
 	for _, node := range resp.NodeAuthData {
 		switch node.Blockchain {
-		default:
-			resp, err := cardanoClient.GetStatistic("08e792fd-2a19-466f-9a2a-d9fd40bdf9d1")
+		case "cardano":
+			resp, err := cardanoClient.GetStatistic(node.Uuid)
 			if err != nil {
 				log.Println(err)
 				continue
