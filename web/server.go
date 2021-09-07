@@ -39,7 +39,7 @@ func authHandler(c *gin.Context) {
 		}
 	case "POST":
 		if c.Request.FormValue("name") != "ada" || c.Request.FormValue("password") != "rocket" {
-			http.Error(c.Writer, "k", 401)
+			http.Error(c.Writer, "wrong username or password", 401)
 			return
 		}
 
