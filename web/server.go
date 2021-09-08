@@ -59,6 +59,71 @@ func authHandler(c *gin.Context) {
 	}
 }
 
+func alertHandlerGet(c *gin.Context) {
+	file, err := WebUI.ReadFile("data/getAlert.html")
+	if err != nil {
+		log.Println(err)
+		http.Error(c.Writer, err.Error(), 500)
+		return
+	}
+
+	tmpl, err := template.New("example").Parse(string(file))
+	if err != nil {
+		log.Println(err)
+		http.Error(c.Writer, err.Error(), 500)
+		return
+	}
+
+	idStr := c.Param("id")
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		log.Println(err)
+		http.Error(c.Writer, err.Error(), 500)
+		return
+	}
+
+	alerts, err := database.Sqllite.GetDataFromAlert(id)
+	if err != nil {
+		log.Println(err)
+		http.Error(c.Writer, err.Error(), 500)
+		return
+	}
+
+	err = tmpl.Execute(c.Writer, alerts)
+	if err != nil {
+		log.Println(err)
+		http.Error(c.Writer, err.Error(), 500)
+		return
+	}
+}
+
+func alertHandlerPost(c *gin.Context) {
+	alertNode := structs.AlertsTable{}
+	var err error
+
+	alertNode.Name = c.Request.FormValue("Name")
+	alertNode.CheckedField = c.Request.FormValue("CheckedField")
+	alertNode.TypeChecker = c.Request.FormValue("TypeChecker")
+
+	idStr := c.Param("id")
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		log.Println(err)
+		http.Error(c.Writer, err.Error(), 500)
+		return
+	}
+	alertNode.ID = id
+
+	err = database.Sqllite.SetDataInAlertsTable(alertNode)
+	if err != nil {
+		log.Println(err)
+		http.Error(c.Writer, err.Error(), 500)
+		return
+	}
+
+	http.Redirect(c.Writer, c.Request, c.Request.URL.Host+"/alerts", 302)
+}
+
 func alertsHandlerGet(c *gin.Context) {
 	file, err := WebUI.ReadFile("data/getAlerts.html")
 	if err != nil {
@@ -189,13 +254,14 @@ func simpleMw(c *gin.Context) {
 func StartServer() {
 	router := gin.Default()
 	router.Use(simpleMw)
-	//router.GET("/alertNode", )
+	router.GET("/alert/:id", alertHandlerGet)
+	router.POST("/alert/:id", alertHandlerPost)
 	router.GET("/alertNode/:id", alertNodeHandlerGet)
 	router.POST("/alertNode/:id", alertNodeHandlerPost)
 	router.GET("/alerts", alertsHandlerGet)
 
 	http.Handle("/", router)
 
-	fmt.Println("Server is listening...  http://127.0.0.1:5400/")
+	fmt.Println("Server is listening...  http://127.0.0.1:5400/alerts")
 	log.Fatal(http.ListenAndServe(":5400", nil))
 }

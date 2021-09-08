@@ -12,10 +12,10 @@
 <table>
     <thead>
     <th align="left">id</th>
-    <th>name</th>
-    <th>checked_field</th>
-    <th>type_checker</th>
-    <th></th>
+    <th align="left">name</th>
+    <th align="left">checked_field</th>
+    <th align="left">type_checker</th>
+    <th align="left"></th>
     </thead>
     {{range .}}
     <tr>
@@ -23,7 +23,7 @@
         <td>{{.Name}}</td>
         <td>{{.CheckedField}}</td>
         <td>{{.TypeChecker}}</td>
-        <td><a href='/'>Изменить</a></td>
+        <td><a href='/alert/{{.ID}}'>Изменить</a></td>
     </tr>
     {{end}}
 </table>
