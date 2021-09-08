@@ -114,7 +114,7 @@ func alertHandlerPost(c *gin.Context) {
 	}
 	alertNode.ID = id
 
-	err = database.Sqllite.SetDataInAlertsTable(alertNode)
+	err = database.Sqllite.UpdateDataInAlertsTable(alertNode)
 	if err != nil {
 		log.Println(err)
 		http.Error(c.Writer, err.Error(), 500)
@@ -226,7 +226,7 @@ func alertNodeHandlerPost(c *gin.Context) {
 	alertNode.Frequency = c.Request.FormValue("Frequency")
 	alertNode.AlertID = id
 
-	err = database.Sqllite.SetDataInAlertNode(alertNode)
+	err = database.Sqllite.UpdateDataInAlertNode(alertNode)
 	if err != nil {
 		log.Println(err)
 		http.Error(c.Writer, err.Error(), 500)

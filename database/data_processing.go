@@ -88,15 +88,15 @@ func (p sqlite) GetDataFromAlert(id int64) (structs.AlertsTable, error) {
 	return alert, nil
 }
 
-const setDataInAlertsTable = `
+const updateDataInAlertsTable = `
 	update alerts
 	set (name, checked_field, type_checker)
 		= ($1,$2,$3)
 	where id = $4
 `
 
-func (p sqlite) SetDataInAlertsTable(table structs.AlertsTable) error {
-	_, err := p.dbConn.Exec(setDataInAlertsTable,
+func (p sqlite) UpdateDataInAlertsTable(table structs.AlertsTable) error {
+	_, err := p.dbConn.Exec(updateDataInAlertsTable,
 		table.Name, table.CheckedField,
 		table.TypeChecker, table.ID)
 
@@ -108,15 +108,15 @@ func (p sqlite) SetDataInAlertsTable(table structs.AlertsTable) error {
 	return nil
 }
 
-const setDataInAlertNode = `
+const updateDataInAlertNode = `
 	update alert_node
 	set (normal_from, normal_to, critical_from, critical_to, frequncy)
 		= ($1,$2,$3,$4,$5)
 	WHERE alert_id = $6
 `
 
-func (p sqlite) SetDataInAlertNode(table structs.AlertNodeTable) error {
-	_, err := p.dbConn.Exec(setDataInAlertNode,
+func (p sqlite) UpdateDataInAlertNode(table structs.AlertNodeTable) error {
+	_, err := p.dbConn.Exec(updateDataInAlertNode,
 		table.NormalFrom, table.NormalTo, table.CriticalFrom,
 		table.CriticalTo, table.Frequency, table.AlertID)
 
