@@ -23,21 +23,21 @@ func authHandler(c *gin.Context) {
 		file, err := WebUI.ReadFile("data/auth.html")
 		if err != nil {
 			log.Println(err)
-			http.Error(c.Writer, err.Error(), 500)
+			http.Error(c.Writer, "internal server error", 500)
 			return
 		}
 
 		tmpl, err := template.New("example").Parse(string(file))
 		if err != nil {
 			log.Println(err)
-			http.Error(c.Writer, err.Error(), 500)
+			http.Error(c.Writer, "internal server error", 500)
 			return
 		}
 
 		err = tmpl.Execute(c.Writer, string(file))
 		if err != nil {
 			log.Println(err)
-			http.Error(c.Writer, err.Error(), 500)
+			http.Error(c.Writer, "internal server error", 500)
 			return
 		}
 	case "POST":
@@ -63,14 +63,14 @@ func alertHandlerGet(c *gin.Context) {
 	file, err := WebUI.ReadFile("data/getAlert.html")
 	if err != nil {
 		log.Println(err)
-		http.Error(c.Writer, err.Error(), 500)
+		http.Error(c.Writer, "internal server error", 500)
 		return
 	}
 
 	tmpl, err := template.New("example").Parse(string(file))
 	if err != nil {
 		log.Println(err)
-		http.Error(c.Writer, err.Error(), 500)
+		http.Error(c.Writer, "internal server error", 500)
 		return
 	}
 
@@ -78,21 +78,21 @@ func alertHandlerGet(c *gin.Context) {
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
 		log.Println(err)
-		http.Error(c.Writer, err.Error(), 500)
+		http.Error(c.Writer, "internal server error", 500)
 		return
 	}
 
 	alerts, err := database.Sqllite.GetDataFromAlert(id)
 	if err != nil {
 		log.Println(err)
-		http.Error(c.Writer, err.Error(), 500)
+		http.Error(c.Writer, "internal server error", 500)
 		return
 	}
 
 	err = tmpl.Execute(c.Writer, alerts)
 	if err != nil {
 		log.Println(err)
-		http.Error(c.Writer, err.Error(), 500)
+		http.Error(c.Writer, "internal server error", 500)
 		return
 	}
 }
@@ -109,7 +109,7 @@ func alertHandlerPost(c *gin.Context) {
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
 		log.Println(err)
-		http.Error(c.Writer, err.Error(), 500)
+		http.Error(c.Writer, "internal server error", 500)
 		return
 	}
 	alertNode.ID = id
@@ -117,7 +117,7 @@ func alertHandlerPost(c *gin.Context) {
 	err = database.Sqllite.UpdateDataInAlertsTable(alertNode)
 	if err != nil {
 		log.Println(err)
-		http.Error(c.Writer, err.Error(), 500)
+		http.Error(c.Writer, "internal server error", 500)
 		return
 	}
 
@@ -128,28 +128,28 @@ func alertsHandlerGet(c *gin.Context) {
 	file, err := WebUI.ReadFile("data/getAlerts.html")
 	if err != nil {
 		log.Println(err)
-		http.Error(c.Writer, err.Error(), 500)
+		http.Error(c.Writer, "internal server error", 500)
 		return
 	}
 
 	tmpl, err := template.New("example").Parse(string(file))
 	if err != nil {
 		log.Println(err)
-		http.Error(c.Writer, err.Error(), 500)
+		http.Error(c.Writer, "internal server error", 500)
 		return
 	}
 
 	alerts, err := database.Sqllite.GetDataFromAlerts()
 	if err != nil {
 		log.Println(err)
-		http.Error(c.Writer, err.Error(), 500)
+		http.Error(c.Writer, "internal server error", 500)
 		return
 	}
 
 	err = tmpl.Execute(c.Writer, alerts)
 	if err != nil {
 		log.Println(err)
-		http.Error(c.Writer, err.Error(), 500)
+		http.Error(c.Writer, "internal server error", 500)
 		return
 	}
 }
@@ -158,14 +158,14 @@ func alertNodeHandlerGet(c *gin.Context) {
 	file, err := WebUI.ReadFile("data/getAlertNode.html")
 	if err != nil {
 		log.Println(err)
-		http.Error(c.Writer, err.Error(), 500)
+		http.Error(c.Writer, "internal server error", 500)
 		return
 	}
 
 	tmpl, err := template.New("example").Parse(string(file))
 	if err != nil {
 		log.Println(err)
-		http.Error(c.Writer, err.Error(), 500)
+		http.Error(c.Writer, "internal server error", 500)
 		return
 	}
 
@@ -173,21 +173,21 @@ func alertNodeHandlerGet(c *gin.Context) {
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
 		log.Println(err)
-		http.Error(c.Writer, err.Error(), 500)
+		http.Error(c.Writer, "internal server error", 500)
 		return
 	}
 
 	alertNode, err := database.Sqllite.GetDataFromAlertNode(id)
 	if err != nil {
 		log.Println(err)
-		http.Error(c.Writer, err.Error(), 500)
+		http.Error(c.Writer, "internal server error", 500)
 		return
 	}
 
 	err = tmpl.Execute(c.Writer, alertNode)
 	if err != nil {
 		log.Println(err)
-		http.Error(c.Writer, err.Error(), 500)
+		http.Error(c.Writer, "internal server error", 500)
 		return
 	}
 }
@@ -197,29 +197,29 @@ func alertNodeHandlerPost(c *gin.Context) {
 	var err error
 	if alertNode.NormalFrom, err = strconv.ParseFloat(c.Request.FormValue("NormalFrom"), 64); err != nil {
 		log.Println(err)
-		http.Error(c.Writer, err.Error(), 500)
+		http.Error(c.Writer, "internal server error", 500)
 		return
 	}
 	if alertNode.NormalTo, err = strconv.ParseFloat(c.Request.FormValue("NormalTo"), 64); err != nil {
 		log.Println(err)
-		http.Error(c.Writer, err.Error(), 500)
+		http.Error(c.Writer, "internal server error", 500)
 		return
 	}
 	if alertNode.CriticalFrom, err = strconv.ParseFloat(c.Request.FormValue("CriticalFrom"), 64); err != nil {
 		log.Println(err)
-		http.Error(c.Writer, err.Error(), 500)
+		http.Error(c.Writer, "internal server error", 500)
 		return
 	}
 	if alertNode.CriticalTo, err = strconv.ParseFloat(c.Request.FormValue("CriticalTo"), 64); err != nil {
 		log.Println(err)
-		http.Error(c.Writer, err.Error(), 500)
+		http.Error(c.Writer, "internal server error", 500)
 		return
 	}
 	idStr := c.Param("id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
 		log.Println(err)
-		http.Error(c.Writer, err.Error(), 500)
+		http.Error(c.Writer, "internal server error", 500)
 		return
 	}
 
@@ -229,7 +229,7 @@ func alertNodeHandlerPost(c *gin.Context) {
 	err = database.Sqllite.UpdateDataInAlertNode(alertNode)
 	if err != nil {
 		log.Println(err)
-		http.Error(c.Writer, err.Error(), 500)
+		http.Error(c.Writer, "internal server error", 500)
 		return
 	}
 
