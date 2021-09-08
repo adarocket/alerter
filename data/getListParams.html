@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Params</title>
+</head>
+<body style="background-color: lightblue;">
+<header>
+</header>
+
+<form method="POST" action="/alertNode/{{.AlertID}}">
+    <table>
+        <thead>
+        <th align="left">Name</th>
+        <th>Value</th>
+        <th></th>
+        </thead>
+        <tr>
+            <td>NormalFrom</td>
+            <td><input name="NormalFrom" type="number" value="{{.NormalFrom}}"/></td>
+            <td>
+                <input type="submit" value="Send" style="padding: 5px; margin: 1px;"/>
+            </td>
+        </tr>
+        <tr>
+            <td>NormalTo</td>
+            <td><input name="NormalTo" type="number" value="{{.NormalTo}}"/></td>
+            <td>
+            </td>
+        </tr>
+        <tr>
+            <td>CriticalFrom</td>
+            <td><input name="CriticalFrom" type="number" value="{{.CriticalFrom}}"/></td>
+            <td>
+            </td>
+        </tr>
+        <tr>
+            <td>CriticalTo</td>
+            <td><input name="CriticalTo" type="number" value="{{.CriticalTo}}"/></td>
+            <td>
+            </td>
+        </tr>
+        <tr>
+            <td>Frequency</td>
+            <td><input name="Frequency" type="text" value="{{.Frequency}}"/></td>
+            <td>
+            </td>
+        </tr>
+    </table>
+</form>
+</body>
+</html>
