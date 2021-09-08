@@ -61,11 +61,58 @@ func (p sqlite) GetDataFromAlertNode(alertId int64) (structs.AlertNodeTable, err
 	return alertNode, nil
 }
 
+const getDataFromAlert = `
+	SELECT id, name, checked_field, type_checker
+	FROM alerts
+	WHERE id = $1
+`
+
+func (p sqlite) GetDataFromAlert(id int64) (structs.AlertsTable, error) {
+	rows, err := p.dbConn.Query(getDataFromAlert, id)
+	if err != nil {
+		log.Println(err)
+		return structs.AlertsTable{}, err
+	}
+	defer rows.Close()
+
+	var alert structs.AlertsTable
+
+	for rows.Next() {
+		err = rows.Scan(&alert.ID, &alert.Name, &alert.CheckedField, &alert.TypeChecker)
+		if err != nil {
+			log.Println(err)
+			return structs.AlertsTable{}, err
+		}
+	}
+
+	return alert, nil
+}
+
+const setDataInAlertsTable = `
+	update alerts
+	set (name, checked_field, type_checker)
+		= ($1,$2,$3)
+	where id = $4
+`
+
+func (p sqlite) SetDataInAlertsTable(table structs.AlertsTable) error {
+	_, err := p.dbConn.Exec(setDataInAlertsTable,
+		table.Name, table.CheckedField,
+		table.TypeChecker, table.ID)
+
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	return nil
+}
+
 const setDataInAlertNode = `
 	update alert_node
 	set (normal_from, normal_to, critical_from, critical_to, frequncy)
-		= (?,?,?,?,?)
-	WHERE alert_id = ?
+		= ($1,$2,$3,$4,$5)
+	WHERE alert_id = $6
 `
 
 func (p sqlite) SetDataInAlertNode(table structs.AlertNodeTable) error {
