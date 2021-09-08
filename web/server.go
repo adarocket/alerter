@@ -59,8 +59,38 @@ func authHandler(c *gin.Context) {
 	}
 }
 
+func alertsHandlerGet(c *gin.Context) {
+	file, err := WebUI.ReadFile("data/getAlerts.html")
+	if err != nil {
+		log.Println(err)
+		http.Error(c.Writer, err.Error(), 500)
+		return
+	}
+
+	tmpl, err := template.New("example").Parse(string(file))
+	if err != nil {
+		log.Println(err)
+		http.Error(c.Writer, err.Error(), 500)
+		return
+	}
+
+	alerts, err := database.Sqllite.GetDataFromAlerts()
+	if err != nil {
+		log.Println(err)
+		http.Error(c.Writer, err.Error(), 500)
+		return
+	}
+
+	err = tmpl.Execute(c.Writer, alerts)
+	if err != nil {
+		log.Println(err)
+		http.Error(c.Writer, err.Error(), 500)
+		return
+	}
+}
+
 func alertNodeHandlerGet(c *gin.Context) {
-	file, err := WebUI.ReadFile("data/getListParams.html")
+	file, err := WebUI.ReadFile("data/getAlertNode.html")
 	if err != nil {
 		log.Println(err)
 		http.Error(c.Writer, err.Error(), 500)
@@ -138,7 +168,7 @@ func alertNodeHandlerPost(c *gin.Context) {
 		return
 	}
 
-	http.Redirect(c.Writer, c.Request, c.Request.URL.String(), 302)
+	http.Redirect(c.Writer, c.Request, c.Request.URL.Host+"/alerts", 302)
 }
 
 func simpleMw(c *gin.Context) {
@@ -162,6 +192,7 @@ func StartServer() {
 	//router.GET("/alertNode", )
 	router.GET("/alertNode/:id", alertNodeHandlerGet)
 	router.POST("/alertNode/:id", alertNodeHandlerPost)
+	router.GET("/alerts", alertsHandlerGet)
 
 	http.Handle("/", router)
 
