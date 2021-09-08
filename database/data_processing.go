@@ -61,6 +61,26 @@ func (p sqlite) GetDataFromAlertNode(alertId int64) (structs.AlertNodeTable, err
 	return alertNode, nil
 }
 
+const setDataInAlertNode = `
+	update alert_node
+	set (normal_from, normal_to, critical_from, critical_to, frequncy)
+		= (?,?,?,?,?)
+	WHERE alert_id = ?
+`
+
+func (p sqlite) SetDataInAlertNode(table structs.AlertNodeTable) error {
+	_, err := p.dbConn.Exec(setDataInAlertNode,
+		table.NormalFrom, table.NormalTo, table.CriticalFrom,
+		table.CriticalTo, table.Frequency, table.AlertID)
+
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	return nil
+}
+
 const fillAlertsTable = `
 	insert OR IGNORE into alerts 
 	(id, name, checked_field, type_checker) 

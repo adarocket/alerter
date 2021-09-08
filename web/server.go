@@ -4,10 +4,13 @@ import (
 	"embed"
 	_ "embed"
 	"fmt"
+	"github.com/adarocket/alerter/database"
+	"github.com/adarocket/alerter/database/structs"
 	"github.com/gin-gonic/gin"
 	"html/template"
 	"log"
 	"net/http"
+	"strconv"
 )
 
 const tokenName = "X-sessionToken"
@@ -56,6 +59,88 @@ func authHandler(c *gin.Context) {
 	}
 }
 
+func alertNodeHandlerGet(c *gin.Context) {
+	file, err := WebUI.ReadFile("data/getListParams.html")
+	if err != nil {
+		log.Println(err)
+		http.Error(c.Writer, err.Error(), 500)
+		return
+	}
+
+	tmpl, err := template.New("example").Parse(string(file))
+	if err != nil {
+		log.Println(err)
+		http.Error(c.Writer, err.Error(), 500)
+		return
+	}
+
+	idStr := c.Param("id")
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		log.Println(err)
+		http.Error(c.Writer, err.Error(), 500)
+		return
+	}
+
+	alertNode, err := database.Sqllite.GetDataFromAlertNode(id)
+	if err != nil {
+		log.Println(err)
+		http.Error(c.Writer, err.Error(), 500)
+		return
+	}
+
+	err = tmpl.Execute(c.Writer, alertNode)
+	if err != nil {
+		log.Println(err)
+		http.Error(c.Writer, err.Error(), 500)
+		return
+	}
+}
+
+func alertNodeHandlerPost(c *gin.Context) {
+	alertNode := structs.AlertNodeTable{}
+	var err error
+	if alertNode.NormalFrom, err = strconv.ParseFloat(c.Request.FormValue("NormalFrom"), 64); err != nil {
+		log.Println(err)
+		http.Error(c.Writer, err.Error(), 500)
+		return
+	}
+	if alertNode.NormalTo, err = strconv.ParseFloat(c.Request.FormValue("NormalTo"), 64); err != nil {
+		log.Println(err)
+		http.Error(c.Writer, err.Error(), 500)
+		return
+	}
+	if alertNode.CriticalFrom, err = strconv.ParseFloat(c.Request.FormValue("CriticalFrom"), 64); err != nil {
+		log.Println(err)
+		http.Error(c.Writer, err.Error(), 500)
+		return
+	}
+	if alertNode.CriticalTo, err = strconv.ParseFloat(c.Request.FormValue("CriticalTo"), 64); err != nil {
+		log.Println(err)
+		http.Error(c.Writer, err.Error(), 500)
+		return
+	}
+	idStr := c.Param("id")
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		log.Println(err)
+		http.Error(c.Writer, err.Error(), 500)
+		return
+	}
+
+	alertNode.Frequency = c.Request.FormValue("Frequency")
+	alertNode.AlertID = id
+
+	err = database.Sqllite.SetDataInAlertNode(alertNode)
+	if err != nil {
+		log.Println(err)
+		http.Error(c.Writer, err.Error(), 500)
+		return
+	}
+
+	http.Redirect(c.Writer, c.Request, c.Request.URL.String(), 302)
+}
+
 func simpleMw(c *gin.Context) {
 	cookies := c.Request.Cookies()
 	if len(cookies) < 1 {
@@ -74,9 +159,9 @@ func simpleMw(c *gin.Context) {
 func StartServer() {
 	router := gin.Default()
 	router.Use(simpleMw)
-	//router.GET("/params", paramsHandler)
-	//router.GET("/param/:name", changeParamHandlerGet)
-	//router.POST("/param/:name", changeParamHandlerPost)
+	//router.GET("/alertNode", )
+	router.GET("/alertNode/:id", alertNodeHandlerGet)
+	router.POST("/alertNode/:id", alertNodeHandlerPost)
 
 	http.Handle("/", router)
 
