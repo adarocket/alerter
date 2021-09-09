@@ -10,4 +10,5 @@ require (
 	github.com/tidwall/gjson v1.8.1
 	github.com/tidwall/pretty v1.2.0 // indirect
 	google.golang.org/grpc v1.40.0
+	google.golang.org/protobuf v1.26.0 // indirect
 )
