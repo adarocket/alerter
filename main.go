@@ -2,6 +2,8 @@ package main
 
 import (
 	"embed"
+	"github.com/adarocket/alerter/database"
+	"github.com/adarocket/alerter/nodesinfo"
 	"github.com/adarocket/alerter/web"
 	"log"
 )
@@ -10,15 +12,13 @@ import (
 var webUI embed.FS
 
 func main() {
-	/*log.SetFlags(log.Lshortfile)
-	database.InitDatabase()
-	database.Sqllite.CreateTables()
-	database.Sqllite.FillTables()
-	database.Sqllite.GetDataFromAlerts()
-	database.Sqllite.GetDataFromAlertNode(0)
-
-	nodesinfo.StartTracking()*/
 	log.SetFlags(log.Lshortfile)
+
+	database.InitDatabase()
 	web.WebUI = webUI
+
+	go func() {
+		nodesinfo.StartTracking()
+	}()
 	web.StartServer()
 }
