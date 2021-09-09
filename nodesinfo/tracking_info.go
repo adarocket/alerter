@@ -1,10 +1,13 @@
 package nodesinfo
 
 import (
+	"github.com/adarocket/alerter/cache"
 	"github.com/adarocket/alerter/client"
+	"github.com/adarocket/alerter/inform"
 	pb "github.com/adarocket/alerter/proto"
 	"google.golang.org/grpc"
 	"log"
+	"time"
 )
 
 var serverURL = "165.22.92.139:5300"
@@ -30,22 +33,28 @@ func StartTracking() {
 		}
 		if err := notifyClient.SendMessage(&msg); err != nil {
 			log.Println(err)
-			return
 		}
+
+		return
 	}
 
-	/*if nodes, err := GetNodes(); err == nil {
-		for _, request := range nodes {
-			inform.CheckNodes(request)
+	cacheInstance := cache.GetCacheInstance()
+	for _ = range time.Tick(time.Second * timeout) {
+		nodes, err := GetNodes()
+		if err != nil {
+			log.Println(err)
+			continue
 		}
 
-		cacheInstance := cache.GetCacheInstance()
+		for _, request := range nodes {
+			if err := inform.CheckNodes(request, notifyClient); err != nil {
+				log.Println(err)
+				continue
+			}
+		}
+
 		cacheInstance.AddNewInform(nodes)
 	}
-
-	for _ = range time.Tick(time.Second * timeout) {
-
-	}*/
 
 	return
 }
