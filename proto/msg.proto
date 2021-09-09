@@ -8,7 +8,9 @@ service Reverse {
 }
 
 message Request {
-  string message = 1;
+  string TypeMessage = 1;
+  string Value = 2;
+  string Frequency = 3;
 }
 
 message Response {

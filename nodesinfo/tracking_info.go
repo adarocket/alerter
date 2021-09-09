@@ -1,9 +1,8 @@
 package nodesinfo
 
 import (
-	"github.com/adarocket/alerter/cache"
 	"github.com/adarocket/alerter/client"
-	"github.com/adarocket/alerter/inform"
+	pb "github.com/adarocket/alerter/proto"
 	"google.golang.org/grpc"
 	"log"
 )
@@ -13,15 +12,29 @@ var informClient *client.ControllerClient
 var authClient *client.AuthClient
 var cardanoClient *client.CardanoClient
 var chiaClient *client.ChiaClient
+var notifyClient *client.NotifierClient
 
 const timeout = 15
 
 func StartTracking() {
-	if err := auth(); err != nil {
-		return
+	notifyClient, err := client.NewNotifierClient()
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	if nodes, err := GetNodes(); err == nil {
+	if err := auth(); err != nil {
+		msg := pb.Request{
+			TypeMessage: "controller down",
+			Value:       err.Error(),
+			Frequency:   "max",
+		}
+		if err := notifyClient.SendMessage(&msg); err != nil {
+			log.Println(err)
+			return
+		}
+	}
+
+	/*if nodes, err := GetNodes(); err == nil {
 		for _, request := range nodes {
 			inform.CheckNodes(request)
 		}
@@ -30,7 +43,7 @@ func StartTracking() {
 		cacheInstance.AddNewInform(nodes)
 	}
 
-	/*for _ = range time.Tick(time.Second * timeout) {
+	for _ = range time.Tick(time.Second * timeout) {
 
 	}*/
 
