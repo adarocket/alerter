@@ -14,6 +14,8 @@ import (
 	"log"
 )
 
+const msgTemplate = "current value: %g, normal value from %g to %g"
+
 func CheckNodes(newNode interface{}, notifyClient *client.NotifierClient) error {
 	cacheInstance := cache.GetCacheInstance()
 	oldNode := cacheInstance.GetOldNodeByType(newNode)
@@ -37,30 +39,38 @@ func CheckNodes(newNode interface{}, notifyClient *client.NotifierClient) error 
 			continue
 		}
 
+		var msg *pb.Request
 		switch alert.TypeChecker {
 		case checker.IntervalT.String():
-			msg, err := IntervalCreateMsg(alert, value)
+			msg, err = IntervalCreateMsg(alert, value)
 			if err != nil {
 				log.Println(err)
 				continue
-			}
-
-			if msg.Value != "" {
-				msg.TypeMessage = fmt.Sprintf("Node %s info", "cardano node")
-				if err := notifyClient.SendMessage(msg); err != nil {
-					log.Println(err)
-					continue
-				}
 			}
 		case checker.ChangeUpT.String():
 			if oldNode == nil {
 				continue
 			}
-			_, _ = ChangeUpCreateMsg(oldNode, alert, value)
+
+			msg, err = ChangeUpCreateMsg(oldNode, alert, value)
+			if err != nil {
+				log.Println(err)
+				continue
+			}
 		case checker.ChangeDownT.String():
 		case checker.DateT.String():
 		default:
 			log.Println("undefiend checker type")
+			continue
+		}
+
+		if msg.Value != "" {
+			msg.TypeMessage = fmt.Sprintf("Node %s info, field %s",
+				alert.Name, alert.CheckedField)
+			if err := notifyClient.SendMessage(msg); err != nil {
+				log.Println(err)
+				continue
+			}
 		}
 	}
 
@@ -73,31 +83,47 @@ func IntervalCreateMsg(alert structs.AlertsTable, value gjson.Result) (*pb.Reque
 		log.Println(err)
 		return &pb.Request{}, err
 	}
+
 	msg := pb.Request{}
-
-	fmt.Println("Input params", alertNode.NormalFrom, alertNode.NormalTo, value)
 	diffVal, _ := checker.Checker(alertNode.NormalFrom, alertNode.NormalTo, value.String(), alert.TypeChecker)
-	fmt.Println("Diff", diffVal)
 
-	if diffVal != 0 {
-		msg.Value = fmt.Sprintf("value: %s, normal value from %s to %s",
-			diffVal, alertNode.NormalFrom, alertNode.NormalTo)
+	if diffVal > alertNode.NormalTo && diffVal < alertNode.NormalFrom {
+		msg.Value = fmt.Sprintf(msgTemplate,
+			diffVal,
+			alertNode.NormalFrom,
+			alertNode.NormalTo)
+
 		msg.Frequency = alertNode.Frequency
 	}
 
 	return &msg, nil
 }
 
-func ChangeUpCreateMsg(oldNode interface{}, alert structs.AlertsTable, value gjson.Result) (pb.Request, error) {
-	if oldNode != nil {
-		oldNodeJSON, _ := json.Marshal(&oldNode)
-		oldValue := gjson.Get(string(oldNodeJSON), alert.CheckedField)
-		if !value.Exists() {
-			log.Println("")
-			return pb.Request{}, errors.New("")
-		}
-		_, _ = checker.Checker(oldValue.Value(), value.String(), nil, alert.TypeChecker)
+func ChangeUpCreateMsg(oldNode interface{}, alert structs.AlertsTable, value gjson.Result) (*pb.Request, error) {
+	alertNode, err := database.Sqllite.GetDataFromAlertNode(alert.ID)
+	if err != nil {
+		log.Println(err)
+		return &pb.Request{}, err
 	}
 
-	return pb.Request{}, errors.New("old not exist")
+	oldNodeJSON, _ := json.Marshal(&oldNode)
+	oldValue := gjson.Get(string(oldNodeJSON), alert.CheckedField)
+	if !value.Exists() {
+		log.Println("val not exist")
+		return &pb.Request{}, errors.New("val not exist")
+	}
+
+	msg := pb.Request{}
+	diffVal, _ := checker.Checker(oldValue.Value(), value.String(), nil, alert.TypeChecker)
+
+	if diffVal > alertNode.NormalTo && diffVal < alertNode.NormalFrom {
+		msg.Value = fmt.Sprintf(msgTemplate,
+			diffVal,
+			alertNode.NormalFrom,
+			alertNode.NormalTo)
+
+		msg.Frequency = alertNode.Frequency
+	}
+
+	return &msg, nil
 }
