@@ -22,20 +22,26 @@ const timeout = 15
 func StartTracking() {
 	notifyClient, err := client.NewNotifierClient()
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		return
 	}
 
-	if err := auth(); err != nil {
-		msg := pb.Request{
-			TypeMessage: "controller down",
-			Value:       err.Error(),
-			Frequency:   "max",
+	tryReconnect := true
+	for tryReconnect {
+		err = auth()
+		if err != nil && authClient == nil {
+			msg := pb.Request{
+				TypeMessage: "controller down",
+				Value:       err.Error(),
+				Frequency:   "max",
+			}
+			if err := notifyClient.SendMessage(&msg); err != nil {
+				log.Println(err)
+			}
+		} else {
+			tryReconnect = false
 		}
-		if err := notifyClient.SendMessage(&msg); err != nil {
-			log.Println(err)
-		}
-
-		return
+		time.Sleep(time.Second * 5)
 	}
 
 	cacheInstance := cache.GetCacheInstance()
@@ -43,13 +49,28 @@ func StartTracking() {
 		nodes, err := GetNodes()
 		if err != nil {
 			log.Println(err)
+			msg := pb.Request{
+				TypeMessage: "cant get nodes",
+				Value:       err.Error(),
+				Frequency:   "max",
+			}
+
+			if err := notifyClient.SendMessage(&msg); err != nil {
+				log.Println(err)
+			}
 			continue
 		}
 
+		var msges []*pb.Request
 		for _, request := range nodes {
-			if err := inform.CheckNodes(request, notifyClient); err != nil {
+			msges, err = inform.CheckFieldsOfNode(request)
+			if err != nil {
 				log.Println(err)
-				continue
+			}
+
+			err = notifyClient.SendMessages(msges)
+			if err != nil {
+				log.Println(err)
 			}
 		}
 

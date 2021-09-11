@@ -18,7 +18,8 @@ func main() {
 	web.WebUI = webUI
 
 	go func() {
-		nodesinfo.StartTracking()
+		web.StartServer()
 	}()
-	web.StartServer()
+
+	nodesinfo.StartTracking()
 }
