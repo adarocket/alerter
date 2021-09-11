@@ -26,21 +26,21 @@ func StartTracking() {
 		return
 	}
 
-	tryReconnect := true
-	for tryReconnect {
+	for {
 		err = auth()
-		if err != nil && authClient == nil {
-			msg := pb.Request{
-				TypeMessage: "controller down",
-				Value:       err.Error(),
-				Frequency:   "max",
-			}
-			if err := notifyClient.SendMessage(&msg); err != nil {
-				log.Println(err)
-			}
-		} else {
-			tryReconnect = false
+		if err == nil {
+			break
 		}
+
+		msg := pb.Request{
+			TypeMessage: "controller down",
+			Value:       err.Error(),
+			Frequency:   "max",
+		}
+		if err := notifyClient.SendMessage(&msg); err != nil {
+			log.Println(err)
+		}
+
 		time.Sleep(time.Second * 5)
 	}
 
