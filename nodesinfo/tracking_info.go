@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-var serverURL = "165.22.92.139:5300"
+var ServerURL = "165.22.92.139:5300"
 var informClient *client.ControllerClient
 var authClient *client.AuthClient
 var cardanoClient *client.CardanoClient
@@ -81,7 +81,7 @@ func StartTracking() {
 }
 
 func auth() error {
-	clientConn, err := grpc.Dial(serverURL, grpc.WithInsecure())
+	clientConn, err := grpc.Dial(ServerURL, grpc.WithInsecure())
 	if err != nil {
 		log.Fatal("cannot dial server: ", err)
 	}
@@ -106,7 +106,7 @@ func setupInterceptorAndClient(accessToken string) {
 		log.Fatal("cannot create auth interceptor: ", err)
 	}
 
-	clientConn, err := grpc.Dial(serverURL, transportOption, grpc.WithUnaryInterceptor(interceptor.Unary()))
+	clientConn, err := grpc.Dial(ServerURL, transportOption, grpc.WithUnaryInterceptor(interceptor.Unary()))
 	if err != nil {
 		log.Fatal("cannot dial server: ", err)
 	}

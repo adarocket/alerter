@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-var target = "127.0.0.1:5300"
+var NotifyTarget = "127.0.0.1:5300"
 
 type NotifierClient struct {
 	client pb.ReverseClient
@@ -20,7 +20,7 @@ func NewNotifierClient() (*NotifierClient, error) {
 		grpc.WithInsecure(),
 	}
 
-	conn, err := grpc.Dial(target, opts...)
+	conn, err := grpc.Dial(NotifyTarget, opts...)
 	if err != nil {
 		grpclog.Errorf("fail to dial: %v", err)
 		log.Println(err)

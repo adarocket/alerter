@@ -7,10 +7,11 @@ import (
 )
 
 var Sqllite sqlite
+var SqlLitePathDB = "sqlDB.db"
 
 // InitDatabase ...
 func InitDatabase() {
-	db, err := sql.Open("sqlite3", "sqlDB.db")
+	db, err := sql.Open("sqlite3", SqlLitePathDB)
 	if err != nil {
 		log.Fatal(err)
 	}

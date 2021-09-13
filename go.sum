@@ -5,6 +5,8 @@ github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAE
 github.com/adarocket/proto v0.3.4 h1:fSOqQ+J49+9A+JjqXafg3raniQWVFCkYpgbJxeYk3fk=
 github.com/adarocket/proto v0.3.4/go.mod h1:EJFz55bc/AsOUfAupyPJZxoNUEPw+gtbCSi503KsUls=
 github.com/antihax/optional v1.0.0/go.mod h1:uupD/76wgC+ih3iEmQUL+0Ugr19nfwCT1kdvxnR2qWY=
+github.com/bykovme/goconfig v0.0.0-20170717154220-caa70d3abfca h1:HvoZBF8ym+TVmTXAtrwld9dKJOYkWJnB4QMyOCCd7Qk=
+github.com/bykovme/goconfig v0.0.0-20170717154220-caa70d3abfca/go.mod h1:8FgfY3borBTXpAYc/KyCh7tq4CzJ8EbH6VLsRR1ugPs=
 github.com/census-instrumentation/opencensus-proto v0.2.1/go.mod h1:f6KPmirojxKA12rnyqOA5BBL4O983OfeGPqjHWSTneU=
 github.com/cespare/xxhash v1.1.0/go.mod h1:XrSqR1VqqWfGrhpAt58auRo0WTKS1nRRg3ghfAqPWnc=
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=

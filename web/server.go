@@ -15,6 +15,8 @@ import (
 
 const tokenName = "X-sessionToken"
 
+var WebServerAddr = ":5400"
+
 var WebUI embed.FS
 
 func authHandler(c *gin.Context) {
@@ -263,5 +265,5 @@ func StartServer() {
 	http.Handle("/", router)
 
 	fmt.Println("Server is listening...  http://127.0.0.1:5400/alerts")
-	log.Fatal(http.ListenAndServe(":5400", nil))
+	log.Fatal(http.ListenAndServe(WebServerAddr, nil))
 }
