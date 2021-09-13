@@ -18,7 +18,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ReverseClient interface {
-	Do(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Response, error)
+	Do(ctx context.Context, in *SendNotifier, opts ...grpc.CallOption) (*ResponseNotifier, error)
 }
 
 type reverseClient struct {
@@ -29,8 +29,8 @@ func NewReverseClient(cc grpc.ClientConnInterface) ReverseClient {
 	return &reverseClient{cc}
 }
 
-func (c *reverseClient) Do(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Response, error) {
-	out := new(Response)
+func (c *reverseClient) Do(ctx context.Context, in *SendNotifier, opts ...grpc.CallOption) (*ResponseNotifier, error) {
+	out := new(ResponseNotifier)
 	err := c.cc.Invoke(ctx, "/proto.Reverse/Do", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -42,7 +42,7 @@ func (c *reverseClient) Do(ctx context.Context, in *Request, opts ...grpc.CallOp
 // All implementations must embed UnimplementedReverseServer
 // for forward compatibility
 type ReverseServer interface {
-	Do(context.Context, *Request) (*Response, error)
+	Do(context.Context, *SendNotifier) (*ResponseNotifier, error)
 	mustEmbedUnimplementedReverseServer()
 }
 
@@ -50,7 +50,7 @@ type ReverseServer interface {
 type UnimplementedReverseServer struct {
 }
 
-func (UnimplementedReverseServer) Do(context.Context, *Request) (*Response, error) {
+func (UnimplementedReverseServer) Do(context.Context, *SendNotifier) (*ResponseNotifier, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Do not implemented")
 }
 func (UnimplementedReverseServer) mustEmbedUnimplementedReverseServer() {}
@@ -67,7 +67,7 @@ func RegisterReverseServer(s grpc.ServiceRegistrar, srv ReverseServer) {
 }
 
 func _Reverse_Do_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Request)
+	in := new(SendNotifier)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -79,7 +79,7 @@ func _Reverse_Do_Handler(srv interface{}, ctx context.Context, dec func(interfac
 		FullMethod: "/proto.Reverse/Do",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ReverseServer).Do(ctx, req.(*Request))
+		return srv.(ReverseServer).Do(ctx, req.(*SendNotifier))
 	}
 	return interceptor(ctx, in, info, handler)
 }

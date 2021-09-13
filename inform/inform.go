@@ -13,7 +13,7 @@ import (
 
 const msgTemplate = "current value: %g, normal value from %g to %g"
 
-func CheckFieldsOfNode(newNode interface{}) ([]*pb.Request, error) {
+func CheckFieldsOfNode(newNode interface{}) ([]*pb.SendNotifier, error) {
 	cacheInstance := cache.GetCacheInstance()
 	oldNode := cacheInstance.GetOldNodeByType(newNode)
 
@@ -29,7 +29,7 @@ func CheckFieldsOfNode(newNode interface{}) ([]*pb.Request, error) {
 		return nil, err
 	}
 
-	var msges []*pb.Request
+	var msges []*pb.SendNotifier
 	for _, alert := range alerts {
 		value := gjson.Get(string(newNodeJSON), alert.CheckedField)
 		if !value.Exists() {
@@ -43,7 +43,7 @@ func CheckFieldsOfNode(newNode interface{}) ([]*pb.Request, error) {
 			continue
 		}
 
-		var msg pb.Request
+		var msg pb.SendNotifier
 		var diffVal float64
 		switch alert.TypeChecker {
 		case checker.IntervalT.String():

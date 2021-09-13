@@ -4,15 +4,15 @@ option go_package = "/proto";
 package proto;
 
 service Reverse {
-  rpc Do(Request) returns (Response) {}
+  rpc Do(SendNotifier) returns (ResponseNotifier) {}
 }
 
-message Request {
+message SendNotifier {
   string TypeMessage = 1;
   string Value = 2;
   string Frequency = 3;
 }
 
-message Response {
+message ResponseNotifier {
   string message = 1;
 }
