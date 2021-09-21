@@ -27,20 +27,15 @@ func StartTracking() {
 	}
 
 	for {
-		err = auth()
-		if err == nil {
+		if err := auth(); err == nil {
 			break
 		}
 
-		msg := pb.SendNotifier{
+		if err := notifyClient.SendMessage(&pb.SendNotifier{
 			TypeMessage: "controller down",
-			Value:       err.Error(),
-			Frequency:   "max",
-		}
-		if err := notifyClient.SendMessage(&msg); err != nil {
+			Value:       err.Error(), Frequency: "max"}); err != nil {
 			log.Println(err)
 		}
-
 		time.Sleep(time.Second * 5)
 	}
 
@@ -49,21 +44,18 @@ func StartTracking() {
 		nodes, err := GetNodes()
 		if err != nil {
 			log.Println(err)
-			msg := pb.SendNotifier{
-				TypeMessage: "cant get nodes",
-				Value:       err.Error(),
-				Frequency:   "max",
-			}
 
-			if err := notifyClient.SendMessage(&msg); err != nil {
+			if err := notifyClient.SendMessage(&pb.SendNotifier{
+				TypeMessage: "cant get nodes",
+				Value:       err.Error(), Frequency: "max"}); err != nil {
 				log.Println(err)
 			}
 			continue
 		}
 
 		var msges []*pb.SendNotifier
-		for _, SendNotifier := range nodes {
-			msges, err = inform.CheckFieldsOfNode(SendNotifier)
+		for key, node := range nodes {
+			msges, err = inform.CheckFieldsOfNode(node, key)
 			if err != nil {
 				log.Println(err)
 			}
@@ -125,14 +117,14 @@ func authMethods() map[string]bool {
 	}
 }
 
-func GetNodes() (map[string]interface{}, error) {
+func GetNodes() (map[cache.KeyCache]interface{}, error) {
 	resp, err := informClient.GetNodeList()
 	if err != nil {
 		log.Println(err)
 		return nil, err
 	}
 
-	cardanoNodes := make(map[string]interface{}, 10)
+	cardanoNodes := make(map[cache.KeyCache]interface{}, 10)
 
 	for _, node := range resp.NodeAuthData {
 		switch node.Blockchain {
@@ -147,7 +139,11 @@ func GetNodes() (map[string]interface{}, error) {
 				continue
 			}
 
-			cardanoNodes[resp.NodeAuthData.Uuid] = resp
+			key := cache.KeyCache{
+				Key:      resp.NodeAuthData.Uuid,
+				TypeNode: node.Blockchain,
+			}
+			cardanoNodes[key] = resp
 		}
 	}
 

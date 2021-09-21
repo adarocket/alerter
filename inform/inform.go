@@ -13,9 +13,9 @@ import (
 
 const msgTemplate = "current value: %g, normal value from %g to %g"
 
-func CheckFieldsOfNode(newNode interface{}) ([]*pb.SendNotifier, error) {
+func CheckFieldsOfNode(newNode interface{}, key cache.KeyCache) ([]*pb.SendNotifier, error) {
 	cacheInstance := cache.GetCacheInstance()
-	oldNode := cacheInstance.GetOldNodeByType(newNode)
+	oldNode := cacheInstance.GetOldNodeByType(newNode, key)
 
 	newNodeJSON, err := json.Marshal(&newNode)
 	if err != nil {
@@ -83,8 +83,8 @@ func CheckFieldsOfNode(newNode interface{}) ([]*pb.SendNotifier, error) {
 				alertNode.NormalFrom,
 				alertNode.NormalTo)
 			msg.Frequency = alertNode.Frequency
-			msg.TypeMessage = fmt.Sprintf("Node %s info, field %s",
-				alert.Name, alert.CheckedField)
+			msg.TypeMessage = fmt.Sprintf("Node %s, uuid: %s info, field %s",
+				key.TypeNode, key.Key, alert.CheckedField)
 
 			msges = append(msges, &msg)
 		}
