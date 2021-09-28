@@ -26,7 +26,7 @@ func getAlertNodeByID(c *gin.Context) {
 		return
 	}
 
-	alertNode, err := database.Sqllite.GetDataFromAlertNode(id)
+	alertNode, err := database.Sqllite.GetNodeAlertByID(id)
 	if err != nil {
 		log.Println(err)
 		http.Error(c.Writer, "internal server error", 500)
@@ -75,7 +75,7 @@ func createAlertNode(c *gin.Context) {
 	alertNode.Frequency = c.Request.FormValue("Frequency")
 	alertNode.AlertID = id
 
-	err = database.Sqllite.UpdateDataInAlertNode(alertNode)
+	err = database.Sqllite.UpdateAlertNode(alertNode)
 	if err != nil {
 		log.Println(err)
 		http.Error(c.Writer, "internal server error", 500)

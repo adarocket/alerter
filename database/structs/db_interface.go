@@ -2,11 +2,11 @@ package structs
 
 // FIXME какой от этого смысл?
 type Database interface {
-	GetDataFromAlerts() ([]AlertsTable, error)
-	GetDataFromAlertNode(alertId int64) (AlertNodeTable, error)
-	GetDataFromAlert(id int64) (AlertsTable, error)
-	UpdateDataInAlertsTable(table AlertsTable) error
-	UpdateDataInAlertNode(table AlertNodeTable) error
+	GetAlerts() ([]AlertsTable, error)
+	GetNodeAlertByID(alertId int64) (AlertNodeTable, error)
+	GetAlertByID(id int64) (AlertsTable, error)
+	UpdateAlert(table AlertsTable) error
+	UpdateAlertNode(table AlertNodeTable) error
 	FillTables() error
 	CreateTables() error
 }
