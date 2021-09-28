@@ -18,5 +18,5 @@ func main() {
 	database.Sqllite.FillTables()
 
 	web.WebUI = webUI
-	web.StartServer("8080")
+	web.StartServer(":8080")
 }
