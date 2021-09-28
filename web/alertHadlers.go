@@ -2,7 +2,6 @@ package web
 
 import (
 	"github.com/adarocket/alerter/database"
-	"github.com/adarocket/alerter/database/structs"
 	"github.com/gin-gonic/gin"
 	"html/template"
 	"log"
@@ -26,7 +25,7 @@ func getAlertByID(c *gin.Context) {
 		return
 	}
 
-	alerts, err := database.Sqllite.GetAlertByID(id)
+	alerts, err := database.Db.GetAlertByID(id)
 	if err != nil {
 		log.Println(err)
 		http.Error(c.Writer, "internal server error", 500)
@@ -42,7 +41,7 @@ func getAlertByID(c *gin.Context) {
 }
 
 func createAlert(c *gin.Context) {
-	alertNode := structs.AlertsTable{}
+	alertNode := database.Alerts{}
 	var err error
 
 	alertNode.Name = c.Request.FormValue("Name")
@@ -58,7 +57,7 @@ func createAlert(c *gin.Context) {
 	}
 	alertNode.ID = id
 
-	err = database.Sqllite.UpdateAlert(alertNode)
+	err = database.Db.UpdateAlert(alertNode)
 	if err != nil {
 		log.Println(err)
 		http.Error(c.Writer, "internal server error", 500)
@@ -76,7 +75,7 @@ func getAlertsList(c *gin.Context) {
 		return
 	}
 
-	alerts, err := database.Sqllite.GetAlerts()
+	alerts, err := database.Db.GetAlerts()
 	if err != nil {
 		log.Println(err)
 		http.Error(c.Writer, "internal server error", 500)

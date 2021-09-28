@@ -1,4 +1,4 @@
-package database
+package sqllite
 
 import (
 	"database/sql"
@@ -7,11 +7,10 @@ import (
 )
 
 var Sqllite sqlite
-var SqlLitePathDB = "sqlDB.db"
 
 // InitDatabase ...
-func InitDatabase() {
-	db, err := sql.Open("sqlite3", SqlLitePathDB)
+func InitDatabase(sqlLitePathDB string) {
+	db, err := sql.Open("sqlite3", sqlLitePathDB)
 	if err != nil {
 		log.Fatal(err)
 	}

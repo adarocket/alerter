@@ -1,7 +1,7 @@
-package database
+package sqllite
 
 import (
-	"github.com/adarocket/alerter/database/structs"
+	"github.com/adarocket/alerter/database"
 	"log"
 )
 
@@ -12,7 +12,7 @@ const updateAlertNode = `
 	WHERE alert_id = $6
 `
 
-func (p sqlite) UpdateAlertNode(alertNode structs.AlertNodeTable) error {
+func (p sqlite) UpdateAlertNode(alertNode database.AlertNode) error {
 	_, err := p.dbConn.Exec(updateAlertNode,
 		alertNode.NormalFrom, alertNode.NormalTo, alertNode.CriticalFrom,
 		alertNode.CriticalTo, alertNode.Frequency, alertNode.AlertID)
@@ -31,22 +31,22 @@ const getAlertNodes = `
 	WHERE alert_id = $1
 `
 
-func (p sqlite) GetNodeAlertByID(alertId int64) (structs.AlertNodeTable, error) {
+func (p sqlite) GetNodeAlertByID(alertId int64) (database.AlertNode, error) {
 	rows, err := p.dbConn.Query(getAlertNodes, alertId)
 	if err != nil {
 		log.Println(err)
-		return structs.AlertNodeTable{}, err
+		return database.AlertNode{}, err
 	}
 	defer rows.Close()
 
-	var alertNode structs.AlertNodeTable
+	var alertNode database.AlertNode
 
 	for rows.Next() {
 		err = rows.Scan(&alertNode.AlertID, &alertNode.NormalFrom,
 			&alertNode.NormalTo, &alertNode.CriticalFrom, &alertNode.CriticalTo, &alertNode.Frequency)
 		if err != nil {
 			log.Println(err)
-			return structs.AlertNodeTable{}, err
+			return database.AlertNode{}, err
 		}
 	}
 
@@ -59,7 +59,7 @@ const createAlertNode = `
 	VALUES ($1, $2, $3, $4, $5, $6)
 `
 
-func (p sqlite) CreateAlertNode(alertNode structs.AlertNodeTable) error {
+func (p sqlite) CreateAlertNode(alertNode database.AlertNode) error {
 	_, err := p.dbConn.Exec(createAlertNode,
 		alertNode.NormalFrom, alertNode.NormalTo, alertNode.CriticalFrom,
 		alertNode.CriticalTo, alertNode.Frequency, alertNode.AlertID)

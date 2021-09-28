@@ -23,7 +23,7 @@ func CheckFieldsOfNode(newNode interface{}, key cache.KeyCache) ([]*pb.SendNotif
 		return nil, err
 	}
 
-	alerts, err := database.Sqllite.GetAlerts()
+	alerts, err := database.Db.GetAlerts()
 	if err != nil {
 		log.Println(err)
 		return nil, err
@@ -37,7 +37,7 @@ func CheckFieldsOfNode(newNode interface{}, key cache.KeyCache) ([]*pb.SendNotif
 			continue
 		}
 
-		alertNode, err := database.Sqllite.GetNodeAlertByID(alert.ID)
+		alertNode, err := database.Db.GetNodeAlertByID(alert.ID)
 		if err != nil {
 			log.Println(err)
 			continue

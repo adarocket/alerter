@@ -1,16 +1,13 @@
-package structs
+package database
 
-// просто Alert будет лучше
-type AlertsTable struct {
+type Alerts struct {
 	ID           int64
 	Name         string
 	CheckedField string
 	TypeChecker  string
 }
 
-// просто NodeAlert будет лучше
-
-type AlertNodeTable struct {
+type AlertNode struct {
 	AlertID      int64
 	NormalFrom   float64
 	NormalTo     float64

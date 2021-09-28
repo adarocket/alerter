@@ -1,10 +1,8 @@
-package database
+package sqllite
 
 import (
 	"log"
 )
-
-// FIXME: где интерфейс?
 
 const fillAlertsTable = `
 	INSERT OR IGNORE INTO alerts 

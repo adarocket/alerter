@@ -1,7 +1,7 @@
-package database
+package sqllite
 
 import (
-	"github.com/adarocket/alerter/database/structs"
+	"github.com/adarocket/alerter/database"
 	"log"
 )
 
@@ -10,17 +10,17 @@ const getAlerts = `
 	FROM alerts
 `
 
-func (p sqlite) GetAlerts() ([]structs.AlertsTable, error) {
+func (p sqlite) GetAlerts() ([]database.Alerts, error) {
 	rows, err := p.dbConn.Query(getAlerts)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer rows.Close()
 
-	var alerts []structs.AlertsTable
+	var alerts []database.Alerts
 
 	for rows.Next() {
-		alert := structs.AlertsTable{}
+		alert := database.Alerts{}
 		err := rows.Scan(&alert.ID, &alert.Name, &alert.CheckedField, &alert.TypeChecker)
 		if err != nil {
 			log.Println(err)
@@ -39,21 +39,21 @@ const getAlertByID = `
 	WHERE id = $1
 `
 
-func (p sqlite) GetAlertByID(id int64) (structs.AlertsTable, error) {
+func (p sqlite) GetAlertByID(id int64) (database.Alerts, error) {
 	rows, err := p.dbConn.Query(getAlertByID, id)
 	if err != nil {
 		log.Println(err)
-		return structs.AlertsTable{}, err
+		return database.Alerts{}, err
 	}
 	defer rows.Close()
 
-	var alert structs.AlertsTable
+	var alert database.Alerts
 
 	for rows.Next() {
 		err = rows.Scan(&alert.ID, &alert.Name, &alert.CheckedField, &alert.TypeChecker)
 		if err != nil {
 			log.Println(err)
-			return structs.AlertsTable{}, err
+			return database.Alerts{}, err
 		}
 	}
 
@@ -67,7 +67,7 @@ const updateAlert = `
 	WHERE id = $4
 `
 
-func (p sqlite) UpdateAlert(alert structs.AlertsTable) error {
+func (p sqlite) UpdateAlert(alert database.Alerts) error {
 	_, err := p.dbConn.Exec(updateAlert,
 		alert.Name, alert.CheckedField,
 		alert.TypeChecker, alert.ID)
@@ -86,7 +86,7 @@ const createAlert = `
 	VALUES ($1,$2, $3, $4)
 `
 
-func (p sqlite) CreateAlert(alert structs.AlertsTable) error {
+func (p sqlite) CreateAlert(alert database.Alerts) error {
 	_, err := p.dbConn.Exec(createAlert,
 		alert.Name, alert.CheckedField,
 		alert.TypeChecker, alert.ID)
