@@ -79,3 +79,36 @@ func (p sqlite) UpdateAlert(alert structs.AlertsTable) error {
 
 	return nil
 }
+
+const createAlert = `
+	INSERT INTO alerts
+	(name, checked_field, type_checker, id)
+	VALUES ($1,$2, $3, $4)
+`
+
+func (p sqlite) CreateAlert(alert structs.AlertsTable) error {
+	_, err := p.dbConn.Exec(createAlert,
+		alert.Name, alert.CheckedField,
+		alert.TypeChecker, alert.ID)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	return nil
+}
+
+const deleteAlert = `
+	DELETE FROM alerts
+	WHERE id = $1
+`
+
+func (p sqlite) DeleteAlert(alertID int64) error {
+	_, err := p.dbConn.Exec(deleteAlert, alertID)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	return nil
+}
