@@ -4,31 +4,43 @@ import (
 	"embed"
 	_ "embed"
 	"fmt"
-	"github.com/adarocket/alerter/database"
-	"github.com/adarocket/alerter/database/structs"
-	"github.com/gin-gonic/gin"
 	"html/template"
 	"log"
 	"net/http"
 	"strconv"
+
+	"github.com/adarocket/alerter/database"
+	"github.com/adarocket/alerter/database/structs"
+	"github.com/gin-gonic/gin"
 )
+
+// FIXME: разбей весь файл, вынеси:
+// обработчики по созданию алертов отдельно
+// обработчики по привязке алерта к ноде отдельно
 
 const tokenName = "X-sessionToken"
 
+// FIXME: почему не в конфиге?
+// FIXME: почему глобальная переменная?
 var WebServerAddr = ":5400"
 
 var WebUI embed.FS
 
+// FIXME: Не делай так. Сделай два разных обработчика для разных методов
 func authHandler(c *gin.Context) {
 	switch c.Request.Method {
 	case "GET":
+		// FIXME: почему так сложно?
+		// FIXME: почему не используешь template.ParseFS() ?
+
 		file, err := WebUI.ReadFile("data/auth.html")
 		if err != nil {
 			log.Println(err)
-			http.Error(c.Writer, "internal server error", 500)
+			http.Error(c.Writer, "internal server error", 500) // FIXME: не используй хардкод, используй глобальные переменные http.StatusInternalServerError
 			return
 		}
 
+		// FIXME: что такое example? Не используй такие названия
 		tmpl, err := template.New("example").Parse(string(file))
 		if err != nil {
 			log.Println(err)
@@ -61,6 +73,8 @@ func authHandler(c *gin.Context) {
 	}
 }
 
+// FIXME: не информативные имена функций. не понятно что делает то или иной обработчик
+// Например getAlertByID
 func alertHandlerGet(c *gin.Context) {
 	file, err := WebUI.ReadFile("data/getAlert.html")
 	if err != nil {
@@ -99,6 +113,7 @@ func alertHandlerGet(c *gin.Context) {
 	}
 }
 
+// Например createAlert
 func alertHandlerPost(c *gin.Context) {
 	alertNode := structs.AlertsTable{}
 	var err error
@@ -157,6 +172,8 @@ func alertsHandlerGet(c *gin.Context) {
 }
 
 func alertNodeHandlerGet(c *gin.Context) {
+
+	// start
 	file, err := WebUI.ReadFile("data/getAlertNode.html")
 	if err != nil {
 		log.Println(err)
@@ -170,6 +187,8 @@ func alertNodeHandlerGet(c *gin.Context) {
 		http.Error(c.Writer, "internal server error", 500)
 		return
 	}
+	// end
+	// FIXME: этот кусок постоянно повторяется, вынеси в отдельную функцию
 
 	idStr := c.Param("id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
@@ -238,6 +257,8 @@ func alertNodeHandlerPost(c *gin.Context) {
 	http.Redirect(c.Writer, c.Request, c.Request.URL.Host+"/alerts", 302)
 }
 
+// FIXME: названия на 10 из 10.
+// прослойки можно привязывать к группам
 func simpleMw(c *gin.Context) {
 	cookies := c.Request.Cookies()
 	if len(cookies) < 1 {
@@ -256,10 +277,13 @@ func simpleMw(c *gin.Context) {
 func StartServer() {
 	router := gin.Default()
 	router.Use(simpleMw)
+
+	// FIXME: где полноценный CRUD
+	// FIXME добавь группы
 	router.GET("/alert/:id", alertHandlerGet)
-	router.POST("/alert/:id", alertHandlerPost)
+	router.POST("/alert/:id", alertHandlerPost) // FIXME: это создание алерта?
 	router.GET("/alertNode/:id", alertNodeHandlerGet)
-	router.POST("/alertNode/:id", alertNodeHandlerPost)
+	router.POST("/alertNode/:id", alertNodeHandlerPost) // FIXME: это создание чего?
 	router.GET("/alerts", alertsHandlerGet)
 
 	http.Handle("/", router)

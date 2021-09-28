@@ -1,15 +1,21 @@
 package database
 
 import (
-	"github.com/adarocket/alerter/database/structs"
 	"log"
+
+	"github.com/adarocket/alerter/database/structs"
 )
+
+// FIXME: где интерфейс?
+// FIXME: Длинные и избыточные названия
+// FIXME: что значит data_processing.go ? из названия не понятно что тут происходит
 
 const getDataFromAlertsTable = `
 	SELECT id, name, checked_field, type_checker
 	FROM alerts
 `
 
+// Например: GetAlerts
 func (p sqlite) GetDataFromAlerts() ([]structs.AlertsTable, error) {
 	rows, err := p.dbConn.Query(getDataFromAlertsTable)
 	if err != nil {
@@ -39,6 +45,7 @@ const getDataFromAlertNodeTable = `
 	WHERE alert_id = $1
 `
 
+// Например: GetNodeAlertByID
 func (p sqlite) GetDataFromAlertNode(alertId int64) (structs.AlertNodeTable, error) {
 	rows, err := p.dbConn.Query(getDataFromAlertNodeTable, alertId)
 	if err != nil {
@@ -67,6 +74,7 @@ const getDataFromAlert = `
 	WHERE id = $1
 `
 
+// Например: GetAlertByID
 func (p sqlite) GetDataFromAlert(id int64) (structs.AlertsTable, error) {
 	rows, err := p.dbConn.Query(getDataFromAlert, id)
 	if err != nil {
@@ -88,6 +96,7 @@ func (p sqlite) GetDataFromAlert(id int64) (structs.AlertsTable, error) {
 	return alert, nil
 }
 
+// FIXME пиши ключевые слова SQL капсом. Будет удобнее читать запросы
 const updateDataInAlertsTable = `
 	update alerts
 	set (name, checked_field, type_checker)

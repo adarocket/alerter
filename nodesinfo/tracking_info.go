@@ -1,15 +1,18 @@
 package nodesinfo
 
 import (
+	"log"
+	"time"
+
 	"github.com/adarocket/alerter/cache"
 	"github.com/adarocket/alerter/client"
 	"github.com/adarocket/alerter/inform"
 	pb "github.com/adarocket/alerter/proto"
 	"google.golang.org/grpc"
-	"log"
-	"time"
 )
 
+// FIXME: почему не в конфиге?
+// FIXME: почему глобальная переменная?
 var ServerURL = "165.22.92.139:5300"
 var informClient *client.ControllerClient
 var authClient *client.AuthClient
@@ -69,6 +72,7 @@ func StartTracking() {
 		cacheInstance.AddNewInform(nodes)
 	}
 
+	// FIXME: return тут не обязателен
 	return
 }
 
@@ -79,6 +83,7 @@ func auth() error {
 	}
 	authClient = client.NewAuthClient(clientConn)
 
+	// FIXME: почему не в конфиге?
 	token, err := authClient.Login("admin1", "secret")
 	if err != nil {
 		log.Println(err.Error())

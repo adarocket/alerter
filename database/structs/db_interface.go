@@ -1,5 +1,6 @@
 package structs
 
+// FIXME какой от этого смысл?
 type Database interface {
 	GetDataFromAlerts() ([]AlertsTable, error)
 	GetDataFromAlertNode(alertId int64) (AlertNodeTable, error)

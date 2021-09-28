@@ -1,10 +1,14 @@
 package cache
 
 import (
+	"sync"
+
 	"github.com/adarocket/proto/proto-gen/cardano"
 	"github.com/adarocket/proto/proto-gen/chia"
-	"sync"
 )
+
+// FIXME: переделать кэширование
+// использовать https://github.com/dgraph-io/ristretto
 
 var (
 	once     sync.Once

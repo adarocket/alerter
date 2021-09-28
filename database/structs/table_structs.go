@@ -1,11 +1,14 @@
 package structs
 
+// просто Alert будет лучше
 type AlertsTable struct {
 	ID           int64
 	Name         string
 	CheckedField string
 	TypeChecker  string
 }
+
+// просто NodeAlert будет лучше
 
 type AlertNodeTable struct {
 	AlertID      int64
