@@ -21,26 +21,28 @@ var WebServerAddr = ":5400"
 
 var WebUI embed.FS
 
-// FIXME: названия на 10 из 10.
-// прослойки можно привязывать к группам
-func simpleMw(c *gin.Context) {
+func authMw(c *gin.Context) {
 	cookies := c.Request.Cookies()
-	if len(cookies) < 1 {
-		authHandler(c)
+
+	if c.Request.Method == "POST" {
+		postAuthHandler(c)
 		return
-	} else {
-		if isValid := IsValidToken(cookies[0].Value); !isValid {
-			authHandler(c)
-			return
-		}
 	}
 
-	c.Next()
+	if len(cookies) < 1 {
+		getAuthHandler(c)
+		c.Abort()
+	} else {
+		if isValid := IsValidToken(cookies[0].Value); !isValid {
+			getAuthHandler(c)
+			c.Abort()
+		}
+	}
 }
 
 func StartServer() {
 	router := gin.Default()
-	router.Use(simpleMw)
+	router.Use(authMw)
 
 	// FIXME: где полноценный CRUD
 	// FIXME добавь группы

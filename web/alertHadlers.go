@@ -10,55 +10,6 @@ import (
 	"strconv"
 )
 
-// FIXME: Не делай так. Сделай два разных обработчика для разных методов
-func authHandler(c *gin.Context) {
-	switch c.Request.Method {
-	case "GET":
-		// FIXME: почему так сложно?
-		// FIXME: почему не используешь template.ParseFS() ?
-
-		file, err := WebUI.ReadFile("data/auth.html")
-		if err != nil {
-			log.Println(err)
-			http.Error(c.Writer, "internal server error", 500) // FIXME: не используй хардкод, используй глобальные переменные http.StatusInternalServerError
-			return
-		}
-
-		// FIXME: что такое example? Не используй такие названия
-		tmpl, err := template.New("example").Parse(string(file))
-		if err != nil {
-			log.Println(err)
-			http.Error(c.Writer, "internal server error", 500)
-			return
-		}
-
-		err = tmpl.Execute(c.Writer, string(file))
-		if err != nil {
-			log.Println(err)
-			http.Error(c.Writer, "internal server error", 500)
-			return
-		}
-	case "POST":
-		if c.Request.FormValue("name") != "ada" || c.Request.FormValue("password") != "rocket" {
-			http.Error(c.Writer, "wrong username or password", 401)
-			return
-		}
-
-		tokenStr, err := GenerateToken()
-		if err != nil {
-			http.Error(c.Writer, "ooops", http.StatusInternalServerError)
-			return
-		}
-
-		cs := &http.Cookie{Name: tokenName, Value: tokenStr}
-		http.SetCookie(c.Writer, cs)
-
-		http.Redirect(c.Writer, c.Request, c.Request.Referer(), 302)
-	}
-}
-
-// FIXME: не информативные имена функций. не понятно что делает то или иной обработчик
-// Например getAlertByID
 func getAlertByID(c *gin.Context) {
 	file, err := WebUI.ReadFile("data/getAlert.html")
 	if err != nil {
