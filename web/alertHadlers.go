@@ -11,14 +11,7 @@ import (
 )
 
 func getAlertByID(c *gin.Context) {
-	file, err := WebUI.ReadFile("data/getAlert.html")
-	if err != nil {
-		log.Println(err)
-		http.Error(c.Writer, "internal server error", 500)
-		return
-	}
-
-	tmpl, err := template.New("example").Parse(string(file))
+	tmpl, err := template.ParseFS(WebUI, "data/getAlert.html")
 	if err != nil {
 		log.Println(err)
 		http.Error(c.Writer, "internal server error", 500)
@@ -77,14 +70,7 @@ func createAlert(c *gin.Context) {
 }
 
 func getAlertsList(c *gin.Context) {
-	file, err := WebUI.ReadFile("data/getAlerts.html")
-	if err != nil {
-		log.Println(err)
-		http.Error(c.Writer, "internal server error", 500)
-		return
-	}
-
-	tmpl, err := template.New("example").Parse(string(file))
+	tmpl, err := template.ParseFS(WebUI, "data/getAlerts.html")
 	if err != nil {
 		log.Println(err)
 		http.Error(c.Writer, "internal server error", 500)

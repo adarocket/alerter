@@ -11,22 +11,12 @@ import (
 )
 
 func getAlertNodeByID(c *gin.Context) {
-	// start
-	file, err := WebUI.ReadFile("data/getAlertNode.html")
+	tmpl, err := template.ParseFS(WebUI, "data/getAlertNode.html")
 	if err != nil {
 		log.Println(err)
 		http.Error(c.Writer, "internal server error", 500)
 		return
 	}
-
-	tmpl, err := template.New("example").Parse(string(file))
-	if err != nil {
-		log.Println(err)
-		http.Error(c.Writer, "internal server error", 500)
-		return
-	}
-	// end
-	// FIXME: этот кусок постоянно повторяется, вынеси в отдельную функцию
 
 	idStr := c.Param("id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
