@@ -9,6 +9,7 @@ import (
 
 func getAuthHandler(c *gin.Context) {
 	if c.Request.Method != "GET" {
+		postAuthHandler(c)
 		return
 	}
 

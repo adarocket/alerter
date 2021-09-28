@@ -16,11 +16,6 @@ var WebUI embed.FS
 func authMw(c *gin.Context) {
 	cookies := c.Request.Cookies()
 
-	if c.Request.Method == "POST" {
-		postAuthHandler(c)
-		return
-	}
-
 	if len(cookies) < 1 {
 		getAuthHandler(c)
 		c.Abort()
