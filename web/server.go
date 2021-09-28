@@ -38,10 +38,10 @@ func StartServer(webServerAddr string) {
 
 	// FIXME: где полноценный CRUD
 	// FIXME добавь группы
-	router.GET("/alert/:id", getAlertByID)
-	router.POST("/alert/:id", createAlert) // FIXME: это создание алерта?
-	router.GET("/alertNode/:id", getAlertNodeByID)
-	router.POST("/alertNode/:id", createAlertNode) // FIXME: это создание чего?
+	router.GET("/alert/:id/edit", getAlertByID)
+	router.POST("/alert/:id/edit", createAlert) // FIXME: это создание алерта?
+	router.GET("/alertNode/:id/edit", getAlertNodeByID)
+	router.POST("/alertNode/:id/edit", createAlertNode) // FIXME: это создание чего?
 	router.GET("/alerts", getAlertsList)
 
 	http.Handle("/", router)

@@ -19,11 +19,11 @@
     </thead>
     {{range .}}
     <tr>
-        <td><a href='/alertNode/{{.ID}}'>{{.ID}}</a></td>
+        <td><a href='/alertNode/{{.ID}}/edit'>{{.ID}}</a></td>
         <td>{{.Name}}</td>
         <td>{{.CheckedField}}</td>
         <td>{{.TypeChecker}}</td>
-        <td><a href='/alert/{{.ID}}'>Изменить</a></td>
+        <td><a href='/alert/{{.ID}}/edit'>Изменить</a></td>
     </tr>
     {{end}}
 </table>
