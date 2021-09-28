@@ -9,15 +9,7 @@ import (
 	"net/http"
 )
 
-// FIXME: разбей весь файл, вынеси:
-// обработчики по созданию алертов отдельно
-// обработчики по привязке алерта к ноде отдельно
-
 const tokenName = "X-sessionToken"
-
-// FIXME: почему не в конфиге?
-// FIXME: почему глобальная переменная?
-var WebServerAddr = ":5400"
 
 var WebUI embed.FS
 
@@ -40,7 +32,7 @@ func authMw(c *gin.Context) {
 	}
 }
 
-func StartServer() {
+func StartServer(webServerAddr string) {
 	router := gin.Default()
 	router.Use(authMw)
 
@@ -55,5 +47,5 @@ func StartServer() {
 	http.Handle("/", router)
 
 	fmt.Println("Server is listening...  http://127.0.0.1:5400/alerts")
-	log.Fatal(http.ListenAndServe(WebServerAddr, nil))
+	log.Fatal(http.ListenAndServe(webServerAddr, nil))
 }

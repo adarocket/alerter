@@ -41,7 +41,6 @@ func getAlertByID(c *gin.Context) {
 	}
 }
 
-// Например createAlert
 func createAlert(c *gin.Context) {
 	alertNode := structs.AlertsTable{}
 	var err error

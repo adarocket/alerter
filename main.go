@@ -3,7 +3,6 @@ package main
 import (
 	"embed"
 	"github.com/adarocket/alerter/database"
-	"github.com/adarocket/alerter/nodesinfo"
 	"github.com/adarocket/alerter/web"
 	"log"
 )
@@ -15,11 +14,9 @@ func main() {
 	log.SetFlags(log.Lshortfile)
 
 	database.InitDatabase()
+	database.Sqllite.CreateTables()
+	database.Sqllite.FillTables()
+
 	web.WebUI = webUI
-
-	go func() {
-		web.StartServer()
-	}()
-
-	nodesinfo.StartTracking()
+	web.StartServer("8080")
 }
