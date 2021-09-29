@@ -1,6 +1,7 @@
 package web
 
 import (
+	"github.com/adarocket/alerter/config"
 	"log"
 	"time"
 
@@ -9,22 +10,32 @@ import (
 
 const (
 	timeTokenAccess = 15 * time.Minute
-	secretKey       = "secretKey" // FIXME: почему не в конфиге?
+	//secretKey       = "secretKey"
 )
 
 func GenerateToken() (string, error) {
+	loadConfig, err := config.LoadConfig()
+	if err != nil {
+		return "", err
+	}
+
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256,
 		jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(timeTokenAccess).Unix(),
 			IssuedAt:  time.Now().Unix(),
 		})
 
-	return token.SignedString([]byte(secretKey))
+	return token.SignedString([]byte(loadConfig.SecretKey))
 }
 
 func IsValidToken(tokenStr string) bool {
+	loadConfig, err := config.LoadConfig()
+	if err != nil {
+		return false
+	}
+
 	token, err := jwt.ParseWithClaims(tokenStr, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte(secretKey), nil
+		return []byte(loadConfig.SecretKey), nil
 	})
 
 	if err != nil {

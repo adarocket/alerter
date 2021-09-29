@@ -10,6 +10,7 @@ type Config struct {
 	SqlLitePathDB  string `json:"sql_lite_path_db"`
 	ControllerAddr string `json:"controller_addr"`
 	WebServerAddr  string `json:"web_server_addr"`
+	SecretKey      string `json:"secret_key"`
 }
 
 const cConfigPath = "alerter.conf"
