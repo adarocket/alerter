@@ -13,7 +13,7 @@ func getAlertByID(c *gin.Context) {
 	tmpl, err := template.ParseFS(WebUI, "data/getAlert.html")
 	if err != nil {
 		log.Println(err)
-		http.Error(c.Writer, "internal server error", 500)
+		http.Error(c.Writer, "internal server error", http.StatusInternalServerError)
 		return
 	}
 
@@ -21,21 +21,21 @@ func getAlertByID(c *gin.Context) {
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
 		log.Println(err)
-		http.Error(c.Writer, "internal server error", 500)
+		http.Error(c.Writer, "internal server error", http.StatusInternalServerError)
 		return
 	}
 
 	alerts, err := database.Db.GetAlertByID(id)
 	if err != nil {
 		log.Println(err)
-		http.Error(c.Writer, "internal server error", 500)
+		http.Error(c.Writer, "internal server error", http.StatusInternalServerError)
 		return
 	}
 
 	err = tmpl.Execute(c.Writer, alerts)
 	if err != nil {
 		log.Println(err)
-		http.Error(c.Writer, "internal server error", 500)
+		http.Error(c.Writer, "internal server error", http.StatusInternalServerError)
 		return
 	}
 }
@@ -52,7 +52,7 @@ func createAlert(c *gin.Context) {
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
 		log.Println(err)
-		http.Error(c.Writer, "internal server error", 500)
+		http.Error(c.Writer, "internal server error", http.StatusInternalServerError)
 		return
 	}
 	alertNode.ID = id
@@ -60,32 +60,32 @@ func createAlert(c *gin.Context) {
 	err = database.Db.UpdateAlert(alertNode)
 	if err != nil {
 		log.Println(err)
-		http.Error(c.Writer, "internal server error", 500)
+		http.Error(c.Writer, "internal server error", http.StatusInternalServerError)
 		return
 	}
 
-	http.Redirect(c.Writer, c.Request, c.Request.URL.Host+"/alerts", 302)
+	http.Redirect(c.Writer, c.Request, c.Request.URL.Host+"/alerts", http.StatusTemporaryRedirect)
 }
 
 func getAlertsList(c *gin.Context) {
 	tmpl, err := template.ParseFS(WebUI, "data/getAlerts.html")
 	if err != nil {
 		log.Println(err)
-		http.Error(c.Writer, "internal server error", 500)
+		http.Error(c.Writer, "internal server error", http.StatusInternalServerError)
 		return
 	}
 
 	alerts, err := database.Db.GetAlerts()
 	if err != nil {
 		log.Println(err)
-		http.Error(c.Writer, "internal server error", 500)
+		http.Error(c.Writer, "internal server error", http.StatusInternalServerError)
 		return
 	}
 
 	err = tmpl.Execute(c.Writer, alerts)
 	if err != nil {
 		log.Println(err)
-		http.Error(c.Writer, "internal server error", 500)
+		http.Error(c.Writer, "internal server error", http.StatusInternalServerError)
 		return
 	}
 }

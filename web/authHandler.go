@@ -16,14 +16,14 @@ func getAuthHandler(c *gin.Context) {
 	tmpl, err := template.ParseFS(WebUI, "data/auth.html")
 	if err != nil {
 		log.Println(err)
-		http.Error(c.Writer, "internal server error", 500)
+		http.Error(c.Writer, "internal server error", http.StatusInternalServerError)
 		return
 	}
 
 	err = tmpl.Execute(c.Writer, nil)
 	if err != nil {
 		log.Println(err)
-		http.Error(c.Writer, "internal server error", 500)
+		http.Error(c.Writer, "internal server error", http.StatusInternalServerError)
 		return
 	}
 }
@@ -34,7 +34,7 @@ func postAuthHandler(c *gin.Context) {
 	}
 
 	if c.Request.FormValue("name") != "ada" || c.Request.FormValue("password") != "rocket" {
-		http.Error(c.Writer, "wrong username or password", 401)
+		http.Error(c.Writer, "wrong username or password", http.StatusUnauthorized)
 		return
 	}
 
@@ -47,5 +47,5 @@ func postAuthHandler(c *gin.Context) {
 	cs := &http.Cookie{Name: tokenName, Value: tokenStr}
 	http.SetCookie(c.Writer, cs)
 
-	http.Redirect(c.Writer, c.Request, c.Request.Referer(), 302)
+	http.Redirect(c.Writer, c.Request, c.Request.Referer(), http.StatusTemporaryRedirect)
 }

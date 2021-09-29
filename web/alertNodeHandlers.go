@@ -13,7 +13,7 @@ func getAlertNodeByID(c *gin.Context) {
 	tmpl, err := template.ParseFS(WebUI, "data/getAlertNode.html")
 	if err != nil {
 		log.Println(err)
-		http.Error(c.Writer, "internal server error", 500)
+		http.Error(c.Writer, "internal server error", http.StatusInternalServerError)
 		return
 	}
 
@@ -21,21 +21,21 @@ func getAlertNodeByID(c *gin.Context) {
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
 		log.Println(err)
-		http.Error(c.Writer, "internal server error", 500)
+		http.Error(c.Writer, "internal server error", http.StatusInternalServerError)
 		return
 	}
 
 	alertNode, err := database.Db.GetNodeAlertByID(id)
 	if err != nil {
 		log.Println(err)
-		http.Error(c.Writer, "internal server error", 500)
+		http.Error(c.Writer, "internal server error", http.StatusInternalServerError)
 		return
 	}
 
 	err = tmpl.Execute(c.Writer, alertNode)
 	if err != nil {
 		log.Println(err)
-		http.Error(c.Writer, "internal server error", 500)
+		http.Error(c.Writer, "internal server error", http.StatusInternalServerError)
 		return
 	}
 }
@@ -45,29 +45,29 @@ func createAlertNode(c *gin.Context) {
 	var err error
 	if alertNode.NormalFrom, err = strconv.ParseFloat(c.Request.FormValue("NormalFrom"), 64); err != nil {
 		log.Println(err)
-		http.Error(c.Writer, "internal server error", 500)
+		http.Error(c.Writer, "internal server error", http.StatusInternalServerError)
 		return
 	}
 	if alertNode.NormalTo, err = strconv.ParseFloat(c.Request.FormValue("NormalTo"), 64); err != nil {
 		log.Println(err)
-		http.Error(c.Writer, "internal server error", 500)
+		http.Error(c.Writer, "internal server error", http.StatusInternalServerError)
 		return
 	}
 	if alertNode.CriticalFrom, err = strconv.ParseFloat(c.Request.FormValue("CriticalFrom"), 64); err != nil {
 		log.Println(err)
-		http.Error(c.Writer, "internal server error", 500)
+		http.Error(c.Writer, "internal server error", http.StatusInternalServerError)
 		return
 	}
 	if alertNode.CriticalTo, err = strconv.ParseFloat(c.Request.FormValue("CriticalTo"), 64); err != nil {
 		log.Println(err)
-		http.Error(c.Writer, "internal server error", 500)
+		http.Error(c.Writer, "internal server error", http.StatusInternalServerError)
 		return
 	}
 	idStr := c.Param("id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
 		log.Println(err)
-		http.Error(c.Writer, "internal server error", 500)
+		http.Error(c.Writer, "internal server error", http.StatusInternalServerError)
 		return
 	}
 
@@ -77,9 +77,9 @@ func createAlertNode(c *gin.Context) {
 	err = database.Db.UpdateAlertNode(alertNode)
 	if err != nil {
 		log.Println(err)
-		http.Error(c.Writer, "internal server error", 500)
+		http.Error(c.Writer, "internal server error", http.StatusInternalServerError)
 		return
 	}
 
-	http.Redirect(c.Writer, c.Request, c.Request.URL.Host+"/alerts", 302)
+	http.Redirect(c.Writer, c.Request, c.Request.URL.Host+"/alerts", http.StatusTemporaryRedirect)
 }
