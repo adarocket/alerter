@@ -31,8 +31,7 @@ func StartTracking() {
 			break
 		}
 		if err := notifyClient.SendMessage(&pb.SendNotifier{
-			TypeMessage: "controller down",
-			Value:       err.Error(), Frequency: "max"}); err != nil {
+			TypeMessage: "controller down", Value: err.Error()}); err != nil {
 			log.Println(err)
 		}
 		time.Sleep(time.Second * 5)
@@ -44,20 +43,20 @@ func StartTracking() {
 		if err != nil {
 			log.Println(err)
 			if err := notifyClient.SendMessage(&pb.SendNotifier{
-				TypeMessage: "cant get nodes",
-				Value:       err.Error(), Frequency: "max"}); err != nil {
+				TypeMessage: "cant get nodes", Value: err.Error()}); err != nil {
 				log.Println(err)
 			}
+			time.Sleep(time.Second * 5)
 			continue
 		}
 
-		var msges []*pb.SendNotifier
+		var messages []*pb.SendNotifier
 		for key, node := range nodes {
-			msges, err = inform.CheckFieldsOfNode(node, key)
+			messages, err = inform.CheckFieldsOfNode(node, key)
 			if err != nil {
 				log.Println(err)
 			}
-			err = notifyClient.SendMessages(msges)
+			err = notifyClient.SendMessages(messages)
 			if err != nil {
 				log.Println(err)
 			}
