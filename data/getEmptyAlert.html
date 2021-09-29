@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Params</title>
+</head>
+<body style="background-color: lightblue;">
+<header>
+</header>
+
+
+<form action="/alert/create" method="POST">
+    <table>
+        <thead>
+        <th align="left">Name</th>
+        <th align="left">Value</th>
+        <th></th>
+        </thead>
+        <tr>
+            <td>Name</td>
+            <td><input name="Name" type="text" value="{{.Name}}"/></td>
+            <td>
+                <input style="padding: 5px; margin: 1px;" type="submit" value="Send"/>
+            </td>
+        </tr>
+        <tr>
+            <td>ID</td>
+            <td><input name="ID" type="number" value="{{.ID}}"/></td>
+            <td>
+            </td>
+        </tr>
+        <tr>
+            <td>CheckedField</td>
+            <td><input name="CheckedField" type="text" value="{{.CheckedField}}"/></td>
+            <td>
+            </td>
+        </tr>
+        <tr>
+            <td>TypeChecker</td>
+            <td><input name="TypeChecker" type="text" value="{{.TypeChecker}}"/></td>
+            <td>
+            </td>
+        </tr>
+    </table>
+</form>
+
+</body>
+</html>

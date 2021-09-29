@@ -10,6 +10,7 @@ import (
 )
 
 const tokenName = "X-sessionToken"
+const homePage = "/alerts"
 
 var WebUI embed.FS
 
@@ -34,10 +35,13 @@ func StartServer(webServerAddr string) {
 	// FIXME: где полноценный CRUD
 	// FIXME добавь группы
 	router.GET("/alert/:id/edit", getAlertByID)
-	router.POST("/alert/:id/edit", createAlert)
+	router.GET("/alert/:id/delete", deleteAlert)
+	router.GET("/alert/create", getEmptyAlertTmpl)
+	router.POST("/alert/create", createAlert)
+	router.POST("/alert/:id/edit", updateAlert)
 	router.GET("/alertNode/:id/edit", getAlertNodeByID)
 	router.POST("/alertNode/:id/edit", createAlertNode)
-	router.GET("/alerts", getAlertsList)
+	router.GET(homePage, getAlertsList)
 
 	http.Handle("/", router)
 

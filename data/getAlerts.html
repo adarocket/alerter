@@ -8,6 +8,7 @@
 <header>
 </header>
 
+<h4><a href='/alert/create'>Создать</a></h4>
 
 <table>
     <thead>
@@ -15,6 +16,8 @@
     <th align="left">name</th>
     <th align="left">checked_field</th>
     <th align="left">type_checker</th>
+    <th align="left"></th>
+    <th align="left"></th>
     <th align="left"></th>
     </thead>
     {{range .}}
@@ -24,6 +27,7 @@
         <td>{{.CheckedField}}</td>
         <td>{{.TypeChecker}}</td>
         <td><a href='/alert/{{.ID}}/edit'>Изменить</a></td>
+        <td><a href='/alert/{{.ID}}/delete'>Удалить</a></td>
     </tr>
     {{end}}
 </table>
