@@ -22,7 +22,7 @@ func GenerateToken() (string, error) {
 	return token.SignedString([]byte(secretKey))
 }
 
-func IsValidToken(tokenStr string) (isnValid bool) {
+func IsValidToken(tokenStr string) bool {
 	token, err := jwt.ParseWithClaims(tokenStr, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return []byte(secretKey), nil
 	})
@@ -32,17 +32,15 @@ func IsValidToken(tokenStr string) (isnValid bool) {
 		return false
 	}
 
-	// FIXME что значит isTr ?
-	claims, isTr := token.Claims.(*jwt.StandardClaims)
-	if !isTr {
+	claims, isTypeExist := token.Claims.(*jwt.StandardClaims)
+	if !isTypeExist {
 		log.Println("invalid type claims")
 		return false
 	}
 
-	// FIXME эта проверка не обязательна, можно просто token.Valid
-	if claims.ExpiresAt < time.Now().Unix() {
-		return isnValid
+	if err := claims.Valid(); err != nil {
+		return false
 	}
 
-	return !isnValid
+	return true
 }
