@@ -6,11 +6,13 @@ import (
 
 // Config - structure of config file
 type Config struct {
-	NotifierAddr   string `json:"notifier_addr"`
-	SqlLitePathDB  string `json:"sql_lite_path_db"`
-	ControllerAddr string `json:"controller_addr"`
-	WebServerAddr  string `json:"web_server_addr"`
-	SecretKey      string `json:"secret_key"`
+	NotifierAddr       string `json:"notifier_addr"`
+	SqlLitePathDB      string `json:"sql_lite_path_db"`
+	ControllerAddr     string `json:"controller_addr"`
+	WebServerAddr      string `json:"web_server_addr"`
+	SecretKey          string `json:"secret_key"`
+	AuthClientLogin    string `json:"auth_client_login"`
+	AuthClientPassword string `json:"auth_client_password"`
 }
 
 const cConfigPath = "alerter.conf"

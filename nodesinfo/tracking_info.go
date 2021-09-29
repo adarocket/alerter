@@ -1,6 +1,7 @@
 package nodesinfo
 
 import (
+	"github.com/adarocket/alerter/config"
 	"log"
 	"time"
 
@@ -13,12 +14,11 @@ import (
 
 // FIXME: почему не в конфиге?
 // FIXME: почему глобальная переменная?
-var ServerURL = "165.22.92.139:5300"
+//var ServerURL = "165.22.92.139:5300"
 var informClient *client.ControllerClient
 var authClient *client.AuthClient
 var cardanoClient *client.CardanoClient
 var chiaClient *client.ChiaClient
-var notifyClient *client.NotifierClient
 
 const timeout = 15
 
@@ -71,31 +71,32 @@ func StartTracking() {
 
 		cacheInstance.AddNewInform(nodes)
 	}
-
-	// FIXME: return тут не обязателен
-	return
 }
 
 func auth() error {
-	clientConn, err := grpc.Dial(ServerURL, grpc.WithInsecure())
+	loadConfig, err := config.LoadConfig()
+	if err != nil {
+		return err
+	}
+
+	clientConn, err := grpc.Dial(loadConfig.WebServerAddr, grpc.WithInsecure())
 	if err != nil {
 		log.Fatal("cannot dial server: ", err)
 	}
 	authClient = client.NewAuthClient(clientConn)
 
-	// FIXME: почему не в конфиге?
-	token, err := authClient.Login("admin1", "secret")
+	token, err := authClient.Login(loadConfig.AuthClientLogin, loadConfig.AuthClientPassword)
 	if err != nil {
 		log.Println(err.Error())
 		return err
 	}
 
-	setupInterceptorAndClient(token)
+	setupInterceptorAndClient(token, loadConfig.WebServerAddr)
 
 	return nil
 }
 
-func setupInterceptorAndClient(accessToken string) {
+func setupInterceptorAndClient(accessToken, serverURL string) {
 	transportOption := grpc.WithInsecure()
 
 	interceptor, err := client.NewAuthInterceptor(authMethods(), accessToken)
@@ -103,7 +104,7 @@ func setupInterceptorAndClient(accessToken string) {
 		log.Fatal("cannot create auth interceptor: ", err)
 	}
 
-	clientConn, err := grpc.Dial(ServerURL, transportOption, grpc.WithUnaryInterceptor(interceptor.Unary()))
+	clientConn, err := grpc.Dial(serverURL, transportOption, grpc.WithUnaryInterceptor(interceptor.Unary()))
 	if err != nil {
 		log.Fatal("cannot dial server: ", err)
 	}
