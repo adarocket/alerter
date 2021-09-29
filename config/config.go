@@ -2,6 +2,8 @@ package config
 
 import (
 	"github.com/bykovme/goconfig"
+	"log"
+	"sync"
 )
 
 // Config - structure of config file
@@ -17,17 +19,27 @@ type Config struct {
 
 const cConfigPath = "alerter.conf"
 
-// var loadedConfig Config
+var once sync.Once
+
+var config Config
 
 func LoadConfig() (loadedConfig Config, err error) {
-	usrHomePath, err := goconfig.GetUserHomePath()
-	if err == nil {
-		err = goconfig.LoadConfig(usrHomePath+cConfigPath, &loadedConfig)
-		if err != nil {
-			return loadedConfig, err
+	var errReturn error
+
+	once.Do(func() {
+		usrHomePath, err := goconfig.GetUserHomePath()
+		if err == nil {
+			err = goconfig.LoadConfig(usrHomePath+cConfigPath, &loadedConfig)
+			if err != nil {
+				log.Println(err)
+				errReturn = err
+			}
+			config = loadedConfig
+		} else {
+			log.Println(err)
+			errReturn = err
 		}
-	} else {
-		return loadedConfig, err
-	}
-	return loadedConfig, err
+	})
+
+	return config, err
 }
