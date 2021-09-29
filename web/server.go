@@ -40,7 +40,11 @@ func StartServer(webServerAddr string) {
 	router.POST("/alert/create", createAlert)
 	router.POST("/alert/:id/edit", updateAlert)
 	router.GET("/alertNode/:id/edit", getAlertNodeByID)
-	router.POST("/alertNode/:id/edit", createAlertNode)
+	router.POST("/alertNode/:id/edit", updateAlertNode)
+	router.GET("/alertNode/:id/action", actionChose)
+	router.GET("/alertNode/:id/create", createAlertNode)
+	router.GET("/alertNode/:id/delete", deleteAlertNode)
+
 	router.GET(homePage, getAlertsList)
 
 	http.Handle("/", router)

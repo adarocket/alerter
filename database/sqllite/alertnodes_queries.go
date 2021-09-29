@@ -6,16 +6,15 @@ import (
 )
 
 const updateAlertNode = `
-	UPDATE alert_node
-	SET (normal_from, normal_to, critical_from, critical_to, frequncy)
-		= ($1,$2,$3,$4,$5)
-	WHERE alert_id = $6
+	INSERT OR REPLACE INTO 
+	alert_node (alert_id, normal_from, normal_to, critical_from, critical_to, frequncy)
+	VALUES ($1,$2,$3,$4,$5,$6)
 `
 
 func (p sqlite) UpdateAlertNode(alertNode database.AlertNode) error {
 	_, err := p.dbConn.Exec(updateAlertNode,
-		alertNode.NormalFrom, alertNode.NormalTo, alertNode.CriticalFrom,
-		alertNode.CriticalTo, alertNode.Frequency, alertNode.AlertID)
+		alertNode.AlertID, alertNode.NormalFrom, alertNode.NormalTo,
+		alertNode.CriticalFrom, alertNode.CriticalTo, alertNode.Frequency)
 
 	if err != nil {
 		log.Println(err)
