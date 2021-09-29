@@ -47,5 +47,5 @@ func postAuthHandler(c *gin.Context) {
 	cs := &http.Cookie{Name: tokenName, Value: tokenStr}
 	http.SetCookie(c.Writer, cs)
 
-	http.Redirect(c.Writer, c.Request, c.Request.Referer(), http.StatusTemporaryRedirect)
+	http.Redirect(c.Writer, c.Request, c.Request.Referer(), http.StatusFound)
 }
