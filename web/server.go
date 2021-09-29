@@ -32,21 +32,24 @@ func StartServer(webServerAddr string) {
 	router := gin.Default()
 	router.Use(authMw)
 
-	// FIXME: где полноценный CRUD
-	// FIXME добавь группы
-	router.GET("/alert/:id/edit", getAlertByID)
-	router.GET("/alert/:id/delete", deleteAlert)
-	router.GET("/alert/create", getEmptyAlertTmpl)
-	router.POST("/alert/create", createAlert)
-	router.POST("/alert/:id/edit", updateAlert)
-	router.GET("/alertNode/:id/edit", getAlertNodeByID)
-	router.POST("/alertNode/:id/edit", updateAlertNode)
-	router.GET("/alertNode/:id/action", actionChose)
-	router.GET("/alertNode/:id/create", createAlertNode)
-	router.GET("/alertNode/:id/delete", deleteAlertNode)
+	alertGroup := router.Group("/alert")
+	{
+		alertGroup.GET("/:id/edit", getAlertByID)
+		alertGroup.GET("/:id/delete", deleteAlert)
+		alertGroup.GET("/create", getEmptyAlertTmpl)
+		alertGroup.POST("/create", createAlert)
+		alertGroup.POST("/:id/edit", updateAlert)
+	}
+	alertNodeGroup := router.Group("/alertNode/:id")
+	{
+		alertNodeGroup.GET("/edit", getAlertNodeByID)
+		alertNodeGroup.POST("/edit", updateAlertNode)
+		alertNodeGroup.GET("/action", actionChose)
+		alertNodeGroup.GET("/create", createAlertNode)
+		alertNodeGroup.GET("/delete", deleteAlertNode)
+	}
 
 	router.GET(homePage, getAlertsList)
-
 	http.Handle("/", router)
 
 	fmt.Println("Server is listening...  http://127.0.0.1:5400/alerts")
