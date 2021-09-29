@@ -27,16 +27,16 @@ func LoadConfig() (loadedConfig Config, err error) {
 	var errReturn error
 
 	once.Do(func() {
-		usrHomePath, err := goconfig.GetUserHomePath()
+		//usrHomePath, err := goconfig.GetUserHomePath()
 		if err == nil {
-			err = goconfig.LoadConfig(usrHomePath+cConfigPath, &loadedConfig)
+			err = goconfig.LoadConfig(cConfigPath, &loadedConfig)
 			if err != nil {
-				log.Println(err)
+				log.Fatal(err)
 				errReturn = err
 			}
 			config = loadedConfig
 		} else {
-			log.Println(err)
+			log.Fatal(err)
 			errReturn = err
 		}
 	})

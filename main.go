@@ -4,6 +4,7 @@ import (
 	"embed"
 	"github.com/adarocket/alerter/database"
 	"github.com/adarocket/alerter/database/sqllite"
+	"github.com/adarocket/alerter/nodesinfo"
 	"github.com/adarocket/alerter/web"
 	"log"
 )
@@ -20,5 +21,8 @@ func main() {
 	database.Db = sqllite.Sqllite
 
 	web.WebUI = webUI
-	web.StartServer(":5400")
+	go func() {
+		nodesinfo.StartTracking()
+	}()
+	web.StartServer(":8080")
 }

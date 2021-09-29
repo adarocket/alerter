@@ -5,6 +5,7 @@ go 1.16
 require (
 	github.com/adarocket/proto v0.3.4
 	github.com/bykovme/goconfig v0.0.0-20170717154220-caa70d3abfca
+	github.com/dgraph-io/ristretto v0.1.0 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-gonic/gin v1.7.4
 	github.com/mattn/go-sqlite3 v1.14.8

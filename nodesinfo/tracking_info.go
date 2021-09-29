@@ -12,9 +12,6 @@ import (
 	"google.golang.org/grpc"
 )
 
-// FIXME: почему не в конфиге?
-// FIXME: почему глобальная переменная?
-//var ServerURL = "165.22.92.139:5300"
 var informClient *client.ControllerClient
 var authClient *client.AuthClient
 var cardanoClient *client.CardanoClient
@@ -33,7 +30,6 @@ func StartTracking() {
 		if err := auth(); err == nil {
 			break
 		}
-
 		if err := notifyClient.SendMessage(&pb.SendNotifier{
 			TypeMessage: "controller down",
 			Value:       err.Error(), Frequency: "max"}); err != nil {
@@ -47,7 +43,6 @@ func StartTracking() {
 		nodes, err := GetNodes()
 		if err != nil {
 			log.Println(err)
-
 			if err := notifyClient.SendMessage(&pb.SendNotifier{
 				TypeMessage: "cant get nodes",
 				Value:       err.Error(), Frequency: "max"}); err != nil {
@@ -62,7 +57,6 @@ func StartTracking() {
 			if err != nil {
 				log.Println(err)
 			}
-
 			err = notifyClient.SendMessages(msges)
 			if err != nil {
 				log.Println(err)
@@ -79,7 +73,7 @@ func auth() error {
 		return err
 	}
 
-	clientConn, err := grpc.Dial(loadConfig.WebServerAddr, grpc.WithInsecure())
+	clientConn, err := grpc.Dial(loadConfig.ControllerAddr, grpc.WithInsecure())
 	if err != nil {
 		log.Fatal("cannot dial server: ", err)
 	}
@@ -91,7 +85,7 @@ func auth() error {
 		return err
 	}
 
-	setupInterceptorAndClient(token, loadConfig.WebServerAddr)
+	setupInterceptorAndClient(token, loadConfig.ControllerAddr)
 
 	return nil
 }
@@ -115,8 +109,6 @@ func setupInterceptorAndClient(accessToken, serverURL string) {
 }
 
 func authMethods() map[string]bool {
-	//const informerServicePath = "/Common.Controller/"
-
 	return map[string]bool{
 		"/cardano.Cardano/" + "GetStatistic":  true, //cardano.Cardano
 		"/Common.Controller/" + "GetNodeList": true, //Common.Controller
