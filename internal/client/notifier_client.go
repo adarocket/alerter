@@ -2,7 +2,7 @@ package client
 
 import (
 	"context"
-	pb "github.com/adarocket/alerter/proto"
+	pb "github.com/adarocket/proto/proto-gen/notifier"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/grpclog"
 	"log"

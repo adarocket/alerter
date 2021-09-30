@@ -7,7 +7,7 @@ import (
 	"log"
 	"time"
 
-	pb "github.com/adarocket/alerter/proto"
+	pb "github.com/adarocket/proto/proto-gen/notifier"
 	"google.golang.org/grpc"
 )
 

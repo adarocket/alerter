@@ -6,7 +6,7 @@ import (
 	"github.com/adarocket/alerter/internal/cache"
 	"github.com/adarocket/alerter/internal/database"
 	checker2 "github.com/adarocket/alerter/internal/nodesinfo/checker"
-	pb "github.com/adarocket/alerter/proto"
+	pb "github.com/adarocket/proto/proto-gen/notifier"
 	"github.com/tidwall/gjson"
 	"log"
 )
