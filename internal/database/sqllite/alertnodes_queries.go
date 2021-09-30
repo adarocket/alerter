@@ -1,7 +1,7 @@
 package sqllite
 
 import (
-	"github.com/adarocket/alerter/database"
+	"github.com/adarocket/alerter/internal/database"
 	"log"
 )
 

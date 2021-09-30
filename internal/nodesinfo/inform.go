@@ -1,11 +1,11 @@
-package inform
+package nodesinfo
 
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/adarocket/alerter/cache"
-	"github.com/adarocket/alerter/checker"
-	"github.com/adarocket/alerter/database"
+	"github.com/adarocket/alerter/internal/cache"
+	"github.com/adarocket/alerter/internal/database"
+	checker2 "github.com/adarocket/alerter/internal/nodesinfo/checker"
 	pb "github.com/adarocket/alerter/proto"
 	"github.com/tidwall/gjson"
 	"log"
@@ -29,7 +29,7 @@ func CheckFieldsOfNode(newNode interface{}, key cache.KeyCache) ([]*pb.SendNotif
 		return nil, err
 	}
 
-	var msges []*pb.SendNotifier
+	var messages []*pb.SendNotifier
 	for _, alert := range alerts {
 		value := gjson.Get(string(newNodeJSON), alert.CheckedField)
 		if !value.Exists() {
@@ -46,14 +46,14 @@ func CheckFieldsOfNode(newNode interface{}, key cache.KeyCache) ([]*pb.SendNotif
 		var msg pb.SendNotifier
 		var diffVal float64
 		switch alert.TypeChecker {
-		case checker.IntervalT.String():
-			diffVal, err = checker.Checker(alertNode.NormalFrom,
+		case checker2.IntervalT.String():
+			diffVal, err = checker2.Checker(alertNode.NormalFrom,
 				alertNode.NormalTo, value.String(), alert.TypeChecker)
 			if err != nil {
 				log.Println(err)
 				continue
 			}
-		case checker.ChangeUpT.String():
+		case checker2.ChangeUpT.String():
 			if oldNode == nil {
 				continue
 			}
@@ -65,13 +65,13 @@ func CheckFieldsOfNode(newNode interface{}, key cache.KeyCache) ([]*pb.SendNotif
 				continue
 			}
 
-			diffVal, err = checker.Checker(oldValue.Value(), value.String(), nil, alert.TypeChecker)
+			diffVal, err = checker2.Checker(oldValue.Value(), value.String(), nil, alert.TypeChecker)
 			if err != nil {
 				log.Println(err)
 				continue
 			}
-		case checker.ChangeDownT.String():
-		case checker.DateT.String():
+		case checker2.ChangeDownT.String():
+		case checker2.DateT.String():
 		default:
 			log.Println("undefiend checker type")
 			continue
@@ -86,9 +86,9 @@ func CheckFieldsOfNode(newNode interface{}, key cache.KeyCache) ([]*pb.SendNotif
 			msg.TypeMessage = fmt.Sprintf("Node %s, uuid: %s info, field %s",
 				key.TypeNode, key.Key, alert.CheckedField)
 
-			msges = append(msges, &msg)
+			messages = append(messages, &msg)
 		}
 	}
 
-	return msges, nil
+	return messages, nil
 }

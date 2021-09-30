@@ -2,10 +2,10 @@ package main
 
 import (
 	"embed"
-	"github.com/adarocket/alerter/database"
-	"github.com/adarocket/alerter/database/sqllite"
-	"github.com/adarocket/alerter/nodesinfo"
-	"github.com/adarocket/alerter/web"
+	"github.com/adarocket/alerter/internal/database"
+	"github.com/adarocket/alerter/internal/database/sqllite"
+	"github.com/adarocket/alerter/internal/nodesinfo"
+	"github.com/adarocket/alerter/internal/web"
 	"log"
 )
 

@@ -1,26 +1,25 @@
 package nodesinfo
 
 import (
-	"github.com/adarocket/alerter/config"
+	"github.com/adarocket/alerter/internal/cache"
+	client2 "github.com/adarocket/alerter/internal/client"
+	"github.com/adarocket/alerter/internal/config"
 	"log"
 	"time"
 
-	"github.com/adarocket/alerter/cache"
-	"github.com/adarocket/alerter/client"
-	"github.com/adarocket/alerter/inform"
 	pb "github.com/adarocket/alerter/proto"
 	"google.golang.org/grpc"
 )
 
-var informClient *client.ControllerClient
-var authClient *client.AuthClient
-var cardanoClient *client.CardanoClient
-var chiaClient *client.ChiaClient
+var informClient *client2.ControllerClient
+var authClient *client2.AuthClient
+var cardanoClient *client2.CardanoClient
+var chiaClient *client2.ChiaClient
 
 const timeout = 15
 
 func StartTracking() {
-	notifyClient, err := client.NewNotifierClient()
+	notifyClient, err := client2.NewNotifierClient()
 	if err != nil {
 		log.Println(err)
 		return
@@ -52,7 +51,7 @@ func StartTracking() {
 
 		var messages []*pb.SendNotifier
 		for key, node := range nodes {
-			messages, err = inform.CheckFieldsOfNode(node, key)
+			messages, err = CheckFieldsOfNode(node, key)
 			if err != nil {
 				log.Println(err)
 			}
@@ -76,7 +75,7 @@ func auth() error {
 	if err != nil {
 		log.Fatal("cannot dial server: ", err)
 	}
-	authClient = client.NewAuthClient(clientConn)
+	authClient = client2.NewAuthClient(clientConn)
 
 	token, err := authClient.Login(loadConfig.AuthClientLogin, loadConfig.AuthClientPassword)
 	if err != nil {
@@ -92,7 +91,7 @@ func auth() error {
 func setupInterceptorAndClient(accessToken, serverURL string) {
 	transportOption := grpc.WithInsecure()
 
-	interceptor, err := client.NewAuthInterceptor(authMethods(), accessToken)
+	interceptor, err := client2.NewAuthInterceptor(authMethods(), accessToken)
 	if err != nil {
 		log.Fatal("cannot create auth interceptor: ", err)
 	}
@@ -102,9 +101,9 @@ func setupInterceptorAndClient(accessToken, serverURL string) {
 		log.Fatal("cannot dial server: ", err)
 	}
 
-	informClient = client.NewControllerClient(clientConn)
-	cardanoClient = client.NewCardanoClient(clientConn)
-	chiaClient = client.NewChiaClient(clientConn)
+	informClient = client2.NewControllerClient(clientConn)
+	cardanoClient = client2.NewCardanoClient(clientConn)
+	chiaClient = client2.NewChiaClient(clientConn)
 }
 
 func authMethods() map[string]bool {

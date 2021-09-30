@@ -1,7 +1,7 @@
 package web
 
 import (
-	"github.com/adarocket/alerter/config"
+	"github.com/adarocket/alerter/internal/config"
 	"log"
 	"time"
 

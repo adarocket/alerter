@@ -1,7 +1,7 @@
 package web
 
 import (
-	"github.com/adarocket/alerter/database"
+	database2 "github.com/adarocket/alerter/internal/database"
 	"github.com/gin-gonic/gin"
 	"html/template"
 	"log"
@@ -9,8 +9,8 @@ import (
 	"strconv"
 )
 
-func getAlertByID(c *gin.Context) {
-	tmpl, err := template.ParseFS(WebUI, "data/getAlert.html")
+func getAlertNodeByID(c *gin.Context) {
+	tmpl, err := template.ParseFS(WebUI, "data/getAlertNode.html")
 	if err != nil {
 		log.Println(err)
 		http.Error(c.Writer, "internal server error", http.StatusInternalServerError)
@@ -25,14 +25,14 @@ func getAlertByID(c *gin.Context) {
 		return
 	}
 
-	alerts, err := database.Db.GetAlertByID(id)
+	alertNode, err := database2.Db.GetNodeAlertByID(id)
 	if err != nil {
 		log.Println(err)
 		http.Error(c.Writer, "internal server error", http.StatusInternalServerError)
 		return
 	}
 
-	err = tmpl.Execute(c.Writer, alerts)
+	err = tmpl.Execute(c.Writer, alertNode)
 	if err != nil {
 		log.Println(err)
 		http.Error(c.Writer, "internal server error", http.StatusInternalServerError)
@@ -40,14 +40,29 @@ func getAlertByID(c *gin.Context) {
 	}
 }
 
-func updateAlert(c *gin.Context) {
-	alertNode := database.Alerts{}
+func updateAlertNode(c *gin.Context) {
+	alertNode := database2.AlertNode{}
 	var err error
-
-	alertNode.Name = c.Request.FormValue("Name")
-	alertNode.CheckedField = c.Request.FormValue("CheckedField")
-	alertNode.TypeChecker = c.Request.FormValue("TypeChecker")
-
+	if alertNode.NormalFrom, err = strconv.ParseFloat(c.Request.FormValue("NormalFrom"), 64); err != nil {
+		log.Println(err)
+		http.Error(c.Writer, "internal server error", http.StatusInternalServerError)
+		return
+	}
+	if alertNode.NormalTo, err = strconv.ParseFloat(c.Request.FormValue("NormalTo"), 64); err != nil {
+		log.Println(err)
+		http.Error(c.Writer, "internal server error", http.StatusInternalServerError)
+		return
+	}
+	if alertNode.CriticalFrom, err = strconv.ParseFloat(c.Request.FormValue("CriticalFrom"), 64); err != nil {
+		log.Println(err)
+		http.Error(c.Writer, "internal server error", http.StatusInternalServerError)
+		return
+	}
+	if alertNode.CriticalTo, err = strconv.ParseFloat(c.Request.FormValue("CriticalTo"), 64); err != nil {
+		log.Println(err)
+		http.Error(c.Writer, "internal server error", http.StatusInternalServerError)
+		return
+	}
 	idStr := c.Param("id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
@@ -55,75 +70,11 @@ func updateAlert(c *gin.Context) {
 		http.Error(c.Writer, "internal server error", http.StatusInternalServerError)
 		return
 	}
-	alertNode.ID = id
 
-	err = database.Db.UpdateAlert(alertNode)
-	if err != nil {
-		log.Println(err)
-		http.Error(c.Writer, "internal server error", http.StatusInternalServerError)
-		return
-	}
+	alertNode.Frequency = c.Request.FormValue("Frequency")
+	alertNode.AlertID = id
 
-	http.Redirect(c.Writer, c.Request, c.Request.URL.Host+homePage, http.StatusTemporaryRedirect)
-}
-
-func getAlertsList(c *gin.Context) {
-	tmpl, err := template.ParseFS(WebUI, "data/getAlerts.html")
-	if err != nil {
-		log.Println(err)
-		http.Error(c.Writer, "internal server error", http.StatusInternalServerError)
-		return
-	}
-
-	alerts, err := database.Db.GetAlerts()
-	if err != nil {
-		log.Println(err)
-		http.Error(c.Writer, "internal server error", http.StatusInternalServerError)
-		return
-	}
-
-	err = tmpl.Execute(c.Writer, alerts)
-	if err != nil {
-		log.Println(err)
-		http.Error(c.Writer, "internal server error", http.StatusInternalServerError)
-		return
-	}
-}
-
-func getEmptyAlertTmpl(c *gin.Context) {
-	tmpl, err := template.ParseFS(WebUI, "data/getEmptyAlert.html")
-	if err != nil {
-		log.Println(err)
-		http.Error(c.Writer, "internal server error", http.StatusInternalServerError)
-		return
-	}
-
-	err = tmpl.Execute(c.Writer, nil)
-	if err != nil {
-		log.Println(err)
-		http.Error(c.Writer, "internal server error", http.StatusInternalServerError)
-		return
-	}
-}
-
-func createAlert(c *gin.Context) {
-	alertNode := database.Alerts{}
-	var err error
-
-	alertNode.Name = c.Request.FormValue("Name")
-	alertNode.CheckedField = c.Request.FormValue("CheckedField")
-	alertNode.TypeChecker = c.Request.FormValue("TypeChecker")
-
-	idStr := c.Request.FormValue("ID")
-	id, err := strconv.ParseInt(idStr, 10, 64)
-	if err != nil {
-		log.Println(err)
-		http.Error(c.Writer, "internal server error", http.StatusInternalServerError)
-		return
-	}
-	alertNode.ID = id
-
-	err = database.Db.CreateAlert(alertNode)
+	err = database2.Db.UpdateAlertNode(alertNode)
 	if err != nil {
 		log.Println(err)
 		http.Error(c.Writer, "internal server error", http.StatusInternalServerError)
@@ -133,7 +84,7 @@ func createAlert(c *gin.Context) {
 	http.Redirect(c.Writer, c.Request, c.Request.URL.Host+homePage, http.StatusFound)
 }
 
-func deleteAlert(c *gin.Context) {
+func actionChose(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
@@ -142,12 +93,60 @@ func deleteAlert(c *gin.Context) {
 		return
 	}
 
-	err = database.Db.DeleteAlert(id)
+	tmpl, err := template.ParseFS(WebUI, "data/actionMenuAlertNode.html")
 	if err != nil {
 		log.Println(err)
 		http.Error(c.Writer, "internal server error", http.StatusInternalServerError)
 		return
 	}
 
-	http.Redirect(c.Writer, c.Request, c.Request.URL.Host+homePage, http.StatusTemporaryRedirect)
+	err = tmpl.Execute(c.Writer, database2.AlertNode{AlertID: id})
+	if err != nil {
+		log.Println(err)
+		http.Error(c.Writer, "internal server error", http.StatusInternalServerError)
+		return
+	}
+}
+
+func createAlertNode(c *gin.Context) {
+	tmpl, err := template.ParseFS(WebUI, "data/getAlertNode.html")
+	if err != nil {
+		log.Println(err)
+		http.Error(c.Writer, "internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	idStr := c.Param("id")
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		log.Println(err)
+		http.Error(c.Writer, "internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	err = tmpl.Execute(c.Writer, database2.AlertNode{AlertID: id})
+	if err != nil {
+		log.Println(err)
+		http.Error(c.Writer, "internal server error", http.StatusInternalServerError)
+		return
+	}
+}
+
+func deleteAlertNode(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		log.Println(err)
+		http.Error(c.Writer, "internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	err = database2.Db.DeleteAlertNode(id)
+	if err != nil {
+		log.Println(err)
+		http.Error(c.Writer, "internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	http.Redirect(c.Writer, c.Request, c.Request.URL.Host+homePage, http.StatusFound)
 }
