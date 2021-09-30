@@ -12,7 +12,7 @@ import (
 var NotifyTarget = "127.0.0.1:5300"
 
 type NotifierClient struct {
-	client pb.ReverseClient
+	client pb.NotifierConnectClient
 }
 
 func NewNotifierClient() (*NotifierClient, error) {
@@ -27,7 +27,7 @@ func NewNotifierClient() (*NotifierClient, error) {
 		return nil, err
 	}
 
-	client := pb.NewReverseClient(conn)
+	client := pb.NewNotifierConnectClient(conn)
 
 	return &NotifierClient{client}, nil
 }
@@ -36,7 +36,7 @@ func (c *NotifierClient) SendMessage(msg *pb.SendNotifier) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	_, err := c.client.Do(ctx, msg)
+	_, err := c.client.SendNotification(ctx, msg)
 	if err != nil {
 		grpclog.Errorf("fail to dial: %v", err)
 		log.Println(err)
@@ -51,7 +51,7 @@ func (c *NotifierClient) SendMessages(msges []*pb.SendNotifier) error {
 	defer cancel()
 
 	for _, msg := range msges {
-		_, err := c.client.Do(ctx, msg)
+		_, err := c.client.SendNotification(ctx, msg)
 		if err != nil {
 			grpclog.Errorf("fail to dial: %v", err)
 			log.Println(err)

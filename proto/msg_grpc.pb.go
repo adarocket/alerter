@@ -14,86 +14,86 @@ import (
 // Requires gRPC-Go v1.32.0 or later.
 const _ = grpc.SupportPackageIsVersion7
 
-// ReverseClient is the client API for Reverse service.
+// NotifierConnectClient is the client API for NotifierConnect service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type ReverseClient interface {
-	Do(ctx context.Context, in *SendNotifier, opts ...grpc.CallOption) (*ResponseNotifier, error)
+type NotifierConnectClient interface {
+	SendNotification(ctx context.Context, in *SendNotifier, opts ...grpc.CallOption) (*ResponseNotifier, error)
 }
 
-type reverseClient struct {
+type notifierConnectClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewReverseClient(cc grpc.ClientConnInterface) ReverseClient {
-	return &reverseClient{cc}
+func NewNotifierConnectClient(cc grpc.ClientConnInterface) NotifierConnectClient {
+	return &notifierConnectClient{cc}
 }
 
-func (c *reverseClient) Do(ctx context.Context, in *SendNotifier, opts ...grpc.CallOption) (*ResponseNotifier, error) {
+func (c *notifierConnectClient) SendNotification(ctx context.Context, in *SendNotifier, opts ...grpc.CallOption) (*ResponseNotifier, error) {
 	out := new(ResponseNotifier)
-	err := c.cc.Invoke(ctx, "/proto.Reverse/Do", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/proto.NotifierConnect/SendNotification", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// ReverseServer is the server API for Reverse service.
-// All implementations must embed UnimplementedReverseServer
+// NotifierConnectServer is the server API for NotifierConnect service.
+// All implementations must embed UnimplementedNotifierConnectServer
 // for forward compatibility
-type ReverseServer interface {
-	Do(context.Context, *SendNotifier) (*ResponseNotifier, error)
-	mustEmbedUnimplementedReverseServer()
+type NotifierConnectServer interface {
+	SendNotification(context.Context, *SendNotifier) (*ResponseNotifier, error)
+	mustEmbedUnimplementedNotifierConnectServer()
 }
 
-// UnimplementedReverseServer must be embedded to have forward compatible implementations.
-type UnimplementedReverseServer struct {
+// UnimplementedNotifierConnectServer must be embedded to have forward compatible implementations.
+type UnimplementedNotifierConnectServer struct {
 }
 
-func (UnimplementedReverseServer) Do(context.Context, *SendNotifier) (*ResponseNotifier, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Do not implemented")
+func (UnimplementedNotifierConnectServer) SendNotification(context.Context, *SendNotifier) (*ResponseNotifier, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SendNotification not implemented")
 }
-func (UnimplementedReverseServer) mustEmbedUnimplementedReverseServer() {}
+func (UnimplementedNotifierConnectServer) mustEmbedUnimplementedNotifierConnectServer() {}
 
-// UnsafeReverseServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to ReverseServer will
+// UnsafeNotifierConnectServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to NotifierConnectServer will
 // result in compilation errors.
-type UnsafeReverseServer interface {
-	mustEmbedUnimplementedReverseServer()
+type UnsafeNotifierConnectServer interface {
+	mustEmbedUnimplementedNotifierConnectServer()
 }
 
-func RegisterReverseServer(s grpc.ServiceRegistrar, srv ReverseServer) {
-	s.RegisterService(&Reverse_ServiceDesc, srv)
+func RegisterNotifierConnectServer(s grpc.ServiceRegistrar, srv NotifierConnectServer) {
+	s.RegisterService(&NotifierConnect_ServiceDesc, srv)
 }
 
-func _Reverse_Do_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _NotifierConnect_SendNotification_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(SendNotifier)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ReverseServer).Do(ctx, in)
+		return srv.(NotifierConnectServer).SendNotification(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/proto.Reverse/Do",
+		FullMethod: "/proto.NotifierConnect/SendNotification",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ReverseServer).Do(ctx, req.(*SendNotifier))
+		return srv.(NotifierConnectServer).SendNotification(ctx, req.(*SendNotifier))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// Reverse_ServiceDesc is the grpc.ServiceDesc for Reverse service.
+// NotifierConnect_ServiceDesc is the grpc.ServiceDesc for NotifierConnect service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var Reverse_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "proto.Reverse",
-	HandlerType: (*ReverseServer)(nil),
+var NotifierConnect_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "proto.NotifierConnect",
+	HandlerType: (*NotifierConnectServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "Do",
-			Handler:    _Reverse_Do_Handler,
+			MethodName: "SendNotification",
+			Handler:    _NotifierConnect_SendNotification_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

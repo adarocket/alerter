@@ -3,11 +3,8 @@ syntax = "proto3";
 option go_package = "/proto";
 package proto;
 
-// FIXME и что же ты разворачиваешь? 
-service Reverse {
-
-// FIXME: названия на 10 из 10.
-  rpc Do(SendNotifier) returns (ResponseNotifier) {}
+service NotifierConnect {
+  rpc SendNotification(SendNotifier) returns (ResponseNotifier) {}
 }
 
 message SendNotifier {
