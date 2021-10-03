@@ -4,6 +4,7 @@ import (
 	"github.com/adarocket/alerter/internal/cache"
 	"github.com/adarocket/alerter/internal/client"
 	"github.com/adarocket/alerter/internal/config"
+	"github.com/adarocket/alerter/internal/nodesinfo/msgsender"
 	"log"
 	"time"
 
@@ -14,7 +15,6 @@ import (
 var informClient *client.ControllerClient
 var authClient *client.AuthClient
 var cardanoClient *client.CardanoClient
-var chiaClient *client.ChiaClient
 
 const timeout = 15
 
@@ -24,6 +24,8 @@ func StartTracking() {
 		log.Println(err)
 		return
 	}
+
+	msgSender := msgsender.CreateMsgSender(notifyClient)
 
 	for {
 		if err := auth(); err == nil {
@@ -41,26 +43,29 @@ func StartTracking() {
 		nodes, err := GetNodes()
 		if err != nil {
 			log.Println(err)
-			if err := notifyClient.SendMessage(&notifier.SendNotifier{
-				TypeMessage: "cant get nodes", Value: err.Error()}); err != nil {
-				log.Println(err)
+			errSend := notifyClient.SendMessage(&notifier.SendNotifier{
+				TypeMessage: "cant get nodes", Value: err.Error()})
+			if errSend != nil {
+				log.Println(errSend)
 			}
 			time.Sleep(time.Second * 5)
 			continue
 		}
 
-		var messages []*notifier.SendNotifier
+		var messages []MsgNodeField
 		for key, node := range nodes {
 			messages, err = CheckFieldsOfNode(node, key)
 			if err != nil {
 				log.Println(err)
 			}
-			err = notifyClient.SendMessages(messages)
-			if err != nil {
-				log.Println(err)
-			}
 		}
 
+		for _, message := range messages {
+			msgSender.AddNotifierToStack(message.SendNotifier, msgsender.KeyMsgSender{
+				NodeUuid:  message.NodeUuid,
+				NodeField: message.NodeField,
+			})
+		}
 		cacheInstance.AddNewInform(nodes)
 	}
 }
@@ -103,7 +108,6 @@ func setupInterceptorAndClient(accessToken, serverURL string) {
 
 	informClient = client.NewControllerClient(clientConn)
 	cardanoClient = client.NewCardanoClient(clientConn)
-	chiaClient = client.NewChiaClient(clientConn)
 }
 
 func authMethods() map[string]bool {
