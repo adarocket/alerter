@@ -2,24 +2,22 @@ package checker
 
 import (
 	"errors"
+	"math"
 	"strconv"
 	"time"
 )
 
 // Interval returns -val if val < a1 and +val if val > a2, return 0 if ok
 func Interval(bottomLine, topLine, val float64) float64 {
-	diffA2 := topLine - val
-
-	if diffA2 > 0.0 {
-		return diffA2
+	if val > topLine {
+		return math.Abs(val) - math.Abs(topLine)
 	}
 
-	diffA1 := bottomLine - val
-	if diffA1 < 0.0 {
-		return diffA1
+	if val < bottomLine {
+		return math.Abs(bottomLine) - math.Abs(val)
 	}
 
-	return 0
+	return val
 }
 
 func ChangeUp(oldVal, newVal float64) float64 {
