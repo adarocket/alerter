@@ -4,12 +4,13 @@ import "log"
 
 const createTableAlertNodeCardano = `
 	CREATE TABLE if not exists "alert_node" (
-	"alert_id"		INTEGER NOT NULL UNIQUE,
+	"alert_id"		INTEGER NOT NULL,
 	"normal_from"	REAL NOT NULL,
 	"normal_to"		REAL NOT NULL,
 	"critical_from"	REAL NOT NULL,
 	"critical_to"	REAL NOT NULL,
 	"frequncy"		TEXT NOT NULL,
+	"node_uuid"		TEXT NOT NULL,
 	FOREIGN KEY("alert_id") REFERENCES "alerts"("id"))
 `
 

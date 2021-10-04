@@ -4,7 +4,8 @@ var Db Database
 
 type Database interface {
 	GetAlerts() ([]Alerts, error)
-	GetNodeAlertByID(alertId int64) (AlertNode, error)
+	GetAlertNodeByIdAndNodeUuid(alertId int64, nodeUuid string) (AlertNode, error)
+	GetAlertNodesByID(alertId int64) ([]AlertNode, error)
 	GetAlertByID(id int64) (Alerts, error)
 	CreateAlertNode(alertNode AlertNode) error
 	DeleteAlertNode(alertNodeID int64) error

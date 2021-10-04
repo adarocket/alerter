@@ -14,4 +14,5 @@ type AlertNode struct {
 	CriticalFrom float64
 	CriticalTo   float64
 	Frequency    string
+	NodeUuid     string
 }
