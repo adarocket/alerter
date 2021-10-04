@@ -73,6 +73,7 @@ func Checker(a1, a2, a3 interface{}, checkerType string) (float64, error) {
 		var dat time.Time
 		if a, isTr := a1.(time.Time); isTr {
 			dat = a
+		} else {
 			return 0, errors.New("invalid date type")
 		}
 
