@@ -21,8 +21,8 @@ var frequencyTypes = [...]string{
 
 var frequencyTypesTime = [...]time.Duration{
 	time.Minute * 10,
-	time.Minute * 5,
 	time.Minute,
+	time.Second,
 }
 
 func (tf TypeFrequency) String() string {

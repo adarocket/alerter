@@ -1,6 +1,7 @@
 package msgsender
 
 import (
+	"fmt"
 	"github.com/adarocket/alerter/internal/client"
 	"github.com/adarocket/proto/proto-gen/notifier"
 	"log"
@@ -25,7 +26,7 @@ func CreateMsgSender(notifyClient *client.NotifierClient) MsgSender {
 	}
 }
 
-func (s *MsgSender) AddNotifierToStack(notifier *notifier.SendNotifier, keyMsgSender KeyMsgSender) {
+func (s *MsgSender) updateNotifierInStack(notifier *notifier.SendNotifier, keyMsgSender KeyMsgSender) {
 	if _, exist := s.stack[keyMsgSender]; exist && notifier.Frequency == Max.String() {
 		delete(s.stack, keyMsgSender)
 		s.notifyClient.SendMessage(notifier)
@@ -36,6 +37,7 @@ func (s *MsgSender) AddNotifierToStack(notifier *notifier.SendNotifier, keyMsgSe
 	} else {
 		go func() {
 			s.stack[keyMsgSender] = notifier
+			s.notifyClient.SendMessage(notifier)
 
 			tmDur, err := GetTimeFrequency(notifier.GetFrequency())
 			if err != nil {
@@ -43,11 +45,33 @@ func (s *MsgSender) AddNotifierToStack(notifier *notifier.SendNotifier, keyMsgSe
 				return
 			}
 
-			time.Sleep(tmDur)
-			if val, existAfter := s.stack[keyMsgSender]; existAfter {
-				delete(s.stack, keyMsgSender)
-				s.notifyClient.SendMessage(val)
+			for {
+				time.Sleep(tmDur)
+				if val, existAfter := s.stack[keyMsgSender]; existAfter {
+					fmt.Println("Send msg")
+					s.notifyClient.SendMessage(val)
+				} else {
+					fmt.Println("delete this")
+					return
+				}
 			}
 		}()
+	}
+}
+
+func (s *MsgSender) AddNotifiersToStack(messages map[KeyMsgSender]*notifier.SendNotifier) {
+	for key, _ := range s.stack {
+		if _, exist := messages[key]; !exist {
+			s.notifyClient.SendMessage(&notifier.SendNotifier{
+				TypeMessage: "Node " + key.NodeUuid + " field " + key.NodeField,
+				Value:       "Field now stable",
+			})
+			delete(s.stack, key)
+			continue
+		}
+	}
+
+	for sender, sendNotifier := range messages {
+		s.updateNotifierInStack(sendNotifier, sender)
 	}
 }

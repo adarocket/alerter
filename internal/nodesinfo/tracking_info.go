@@ -16,7 +16,7 @@ var informClient *client.ControllerClient
 var authClient *client.AuthClient
 var cardanoClient *client.CardanoClient
 
-const timeout = 15
+const timeout = 5
 
 func StartTracking() {
 	notifyClient, err := client.NewNotifierClient()
@@ -52,7 +52,7 @@ func StartTracking() {
 			continue
 		}
 
-		var messages []MsgNodeField
+		var messages map[msgsender.KeyMsgSender]*notifier.SendNotifier
 		for key, node := range nodes {
 			messages, err = CheckFieldsOfNode(node, key)
 			if err != nil {
@@ -60,12 +60,7 @@ func StartTracking() {
 			}
 		}
 
-		for _, message := range messages {
-			msgSender.AddNotifierToStack(message.SendNotifier, msgsender.KeyMsgSender{
-				NodeUuid:  message.NodeUuid,
-				NodeField: message.NodeField,
-			})
-		}
+		msgSender.AddNotifiersToStack(messages)
 		cacheInstance.AddNewInform(nodes)
 	}
 }

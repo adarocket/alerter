@@ -10,9 +10,12 @@ import (
 	pb "github.com/adarocket/proto/proto-gen/notifier"
 	"github.com/tidwall/gjson"
 	"log"
+	"time"
 )
 
-const msgTemplate = "current value: %g, normal value from %g to %g"
+const msgTemplateNormal = "current value: %s, normal value from %g to %g"
+const msgTemplateCritical = "current value: %s, critical value from %g to %g"
+const msgTemplateType = "Node %s, field %s"
 
 type MsgNodeField struct {
 	NodeUuid  string
@@ -20,7 +23,7 @@ type MsgNodeField struct {
 	*pb.SendNotifier
 }
 
-func CheckFieldsOfNode(newNode interface{}, key cache.KeyCache) ([]MsgNodeField, error) {
+func CheckFieldsOfNode(newNode interface{}, key cache.KeyCache) (map[msgsender.KeyMsgSender]*pb.SendNotifier, error) {
 	cacheInstance := cache.GetCacheInstance()
 	oldNode := cacheInstance.GetOldNodeByType(newNode, key)
 
@@ -36,7 +39,7 @@ func CheckFieldsOfNode(newNode interface{}, key cache.KeyCache) ([]MsgNodeField,
 		return nil, err
 	}
 
-	var messages []MsgNodeField
+	messages := map[msgsender.KeyMsgSender]*pb.SendNotifier{}
 	for _, alert := range alerts {
 		value := gjson.Get(string(newNodeJSON), alert.CheckedField)
 		if !value.Exists() {
@@ -50,7 +53,18 @@ func CheckFieldsOfNode(newNode interface{}, key cache.KeyCache) ([]MsgNodeField,
 			continue
 		}
 
-		msg := MsgNodeField{SendNotifier: &pb.SendNotifier{}}
+		var oldValue interface{}
+		if oldNode != nil {
+			oldNodeJSON, _ := json.Marshal(&oldNode)
+			oldVal := gjson.Get(string(oldNodeJSON), alert.CheckedField)
+			if !value.Exists() {
+				log.Println("val not exist")
+				continue
+			}
+			oldValue = oldVal.String()
+		}
+
+		msg := pb.SendNotifier{}
 		var diffVal float64
 
 		switch alert.TypeChecker {
@@ -65,36 +79,45 @@ func CheckFieldsOfNode(newNode interface{}, key cache.KeyCache) ([]MsgNodeField,
 			if oldNode == nil {
 				continue
 			}
-			oldNodeJSON, _ := json.Marshal(&oldNode)
-			oldValue := gjson.Get(string(oldNodeJSON), alert.CheckedField)
-			if !value.Exists() {
-				log.Println("val not exist")
-				continue
-			}
-
-			diffVal, err = checker.Checker(oldValue.Value(), value.String(), nil, alert.TypeChecker)
+			diffVal, err = checker.Checker(oldValue, value.String(), nil, alert.TypeChecker)
 			if err != nil {
 				log.Println(err)
 				continue
 			}
 		case checker.ChangeDownT.String():
 		case checker.DateT.String():
+			tm, err := time.Parse("2006-01-02 15:04:05 -0700 MST", value.String())
+			if err != nil {
+				log.Println(err)
+				continue
+			}
+			diffVal, err = checker.Checker(tm, nil, nil, alert.TypeChecker)
+			if err != nil {
+				log.Println(err)
+				continue
+			}
 		default:
-			log.Println("undefiend checker type")
+			log.Println("undefined checker type")
 			continue
 		}
 
 		if diffVal > alertNode.CriticalTo || diffVal < alertNode.CriticalFrom {
-			msg.Frequency = msgsender.Normal.String()
+			msg.Frequency = msgsender.Max.String()
+			msg.Value = fmt.Sprintf(msgTemplateCritical, value.String(), alertNode.NormalFrom, alertNode.NormalTo)
 		} else if diffVal > alertNode.NormalTo || diffVal < alertNode.NormalFrom {
-			msg.Frequency = msgsender.Normal.String()
+			msg.Value = fmt.Sprintf(msgTemplateNormal, value.String(), alertNode.NormalFrom, alertNode.NormalTo)
+			msg.Frequency = alertNode.Frequency
+		} else {
+			continue
 		}
 
-		msg.Value = fmt.Sprintf(msgTemplate, diffVal, alertNode.NormalFrom, alertNode.NormalTo)
-		msg.NodeField = alert.CheckedField
-		msg.NodeUuid = key.Key
+		msg.TypeMessage = fmt.Sprintf(msgTemplateType, key.Key, alert.CheckedField)
+		messagesKey := msgsender.KeyMsgSender{
+			NodeUuid:  key.Key,
+			NodeField: alert.CheckedField,
+		}
 
-		messages = append(messages, msg)
+		messages[messagesKey] = &msg
 	}
 
 	return messages, nil
