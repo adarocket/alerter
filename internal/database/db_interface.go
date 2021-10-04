@@ -8,7 +8,7 @@ type Database interface {
 	GetAlertNodesByID(alertId int64) ([]AlertNode, error)
 	GetAlertByID(id int64) (Alerts, error)
 	CreateAlertNode(alertNode AlertNode) error
-	DeleteAlertNode(alertNodeID int64) error
+	DeleteAlertNode(alertNodeID int64, nodeUuid string) error
 	CreateAlert(alert Alerts) error
 	DeleteAlert(alertID int64) error
 	UpdateAlert(table Alerts) error

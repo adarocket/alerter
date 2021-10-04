@@ -104,11 +104,11 @@ func (p sqlite) CreateAlertNode(alertNode database.AlertNode) error {
 
 const deleteAlertNode = `
 	DELETE FROM alert_node
-	WHERE alert_id = $1
+	WHERE alert_id = $1 AND node_uuid = $2
 `
 
-func (p sqlite) DeleteAlertNode(alertNodeID int64) error {
-	_, err := p.dbConn.Exec(deleteAlertNode, alertNodeID)
+func (p sqlite) DeleteAlertNode(alertNodeID int64, nodeUuid string) error {
+	_, err := p.dbConn.Exec(deleteAlertNode, alertNodeID, nodeUuid)
 	if err != nil {
 		log.Println(err)
 		return err
