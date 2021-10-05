@@ -6,15 +6,22 @@ import (
 )
 
 const updateAlertNode = `
-	INSERT OR REPLACE INTO 
-	alert_node (alert_id, normal_from, normal_to, critical_from, critical_to, frequncy, node_uuid)
-	VALUES ($1,$2,$3,$4,$5,$6,$7)
+	UPDATE alert_node
+	SET node_uuid = $1,
+	    alert_id = $2,
+	    critical_from = $3,
+	    critical_to = $4,
+	    normal_from = $5,
+	    normal_to = $6,
+	    frequncy = $7
+	WHERE
+    	node_uuid = $1 AND alert_id = $2
 `
 
 func (p sqlite) UpdateAlertNode(alertNode database.AlertNode) error {
 	_, err := p.dbConn.Exec(updateAlertNode,
-		alertNode.AlertID, alertNode.NormalFrom, alertNode.NormalTo,
-		alertNode.CriticalFrom, alertNode.CriticalTo, alertNode.Frequency, alertNode.NodeUuid)
+		alertNode.NodeUuid, alertNode.AlertID, alertNode.CriticalFrom, alertNode.CriticalTo,
+		alertNode.NormalFrom, alertNode.NormalTo, alertNode.Frequency)
 
 	if err != nil {
 		log.Println(err)
@@ -74,7 +81,8 @@ func (p sqlite) GetAlertNodeByIdAndNodeUuid(alertId int64, nodeUuid string) (dat
 
 	for rows.Next() {
 		err = rows.Scan(&alertNode.AlertID, &alertNode.NormalFrom,
-			&alertNode.NormalTo, &alertNode.CriticalFrom, &alertNode.CriticalTo, &alertNode.Frequency)
+			&alertNode.NormalTo, &alertNode.CriticalFrom,
+			&alertNode.CriticalTo, &alertNode.Frequency, &alertNode.NodeUuid)
 		if err != nil {
 			log.Println(err)
 			return database.AlertNode{}, err

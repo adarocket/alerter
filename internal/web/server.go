@@ -40,18 +40,19 @@ func StartServer(webServerAddr string) {
 		alertGroup.POST("/create", createAlert)
 		alertGroup.POST("/:id/edit", updateAlert)
 	}
-	alertNodeGroup := router.Group("/alertNode/:id")
+	alertNodeGroup := router.Group("/alertNode")
 	{
-		alertNodeGroup.GET("/edit", getAlertNodeByID)
+		alertNodeGroup.GET("/:id/:uuid/edit", GetAlertNodeByIDAndUuid)
 		alertNodeGroup.POST("/edit", updateAlertNode)
-		alertNodeGroup.GET("/action", actionChose)
-		alertNodeGroup.GET("/create", createAlertNode)
-		alertNodeGroup.GET("/delete", deleteAlertNode)
+		alertNodeGroup.GET("/create", getEmptyAlertNodeTmpl)
+		alertNodeGroup.POST("/create", createAlertNode)
+		alertNodeGroup.GET("/:id/:uuid/delete", deleteAlertNode)
 	}
 
+	router.GET("/alertNodes/:id", getAlertNodesListByID)
 	router.GET(homePage, getAlertsList)
 	http.Handle("/", router)
 
-	fmt.Println("Server is listening...  http://127.0.0.1:5400/alerts")
+	fmt.Println("Server is listening...  http://127.0.0.1:8080/alerts")
 	log.Fatal(http.ListenAndServe(webServerAddr, nil))
 }

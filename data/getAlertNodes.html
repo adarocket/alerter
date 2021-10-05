@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AlertNodes</title>
+</head>
+<body style="background-color: lightblue;">
+<header>
+</header>
+
+<h4><a href="/alertNode/create">Создать</a></h4>
+
+<table>
+    <thead>
+    <th align="left">AlertID</th>
+    <th align="left">NormalFrom</th>
+    <th align="left">NormalTo</th>
+    <th align="left">CriticalFrom</th>
+    <th align="left">CriticalTo</th>
+    <th align="left">Frequency</th>
+    <th align="left">NodeUuid</th>
+    <th align="left"></th>
+    <th align="left"></th>
+    <th align="left"></th>
+    </thead>
+    {{range .}}
+    <tr>
+        <td>{{.AlertID}}</td>
+        <td>{{.NormalFrom}}</td>
+        <td>{{.NormalTo}}</td>
+        <td>{{.CriticalFrom}}</td>
+        <td>{{.CriticalTo}}</td>
+        <td>{{.Frequency}}</td>
+        <td>{{.NodeUuid}}</td>
+        <td><a href='/alertNode/{{.AlertID}}/{{.NodeUuid}}/edit'>Изменить</a></td>
+        <td><a href='/alertNode/{{.AlertID}}/{{.NodeUuid}}/delete'>Удалить</a></td>
+    </tr>
+    {{end}}
+</table>
+
+</body>
+</html>
