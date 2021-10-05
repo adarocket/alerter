@@ -1,6 +1,7 @@
 package sqllite
 
 import (
+	"errors"
 	"github.com/adarocket/alerter/internal/database"
 	"log"
 )
@@ -87,9 +88,11 @@ func (p sqlite) GetAlertNodeByIdAndNodeUuid(alertId int64, nodeUuid string) (dat
 			log.Println(err)
 			return database.AlertNode{}, err
 		}
+
+		return alertNode, nil
 	}
 
-	return alertNode, nil
+	return alertNode, errors.New("nothing found")
 }
 
 const createAlertNode = `
