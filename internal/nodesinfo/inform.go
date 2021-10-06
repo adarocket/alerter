@@ -33,7 +33,7 @@ func CheckFieldsOfNode(newNode interface{}, key cache.KeyCache) (map[msgsender.K
 		return nil, err
 	}
 
-	alerts, err := database.GetAlertDB().GetAlerts()
+	alerts, err := database.GetAlertNodeDB().GetCrossAlertNodeAndAlert(key.Key)
 	if err != nil {
 		log.Println(err)
 		return nil, err
@@ -44,12 +44,6 @@ func CheckFieldsOfNode(newNode interface{}, key cache.KeyCache) (map[msgsender.K
 		value := gjson.Get(string(newNodeJSON), alert.CheckedField)
 		if !value.Exists() {
 			log.Println("val not exist")
-			continue
-		}
-
-		alertNode, err := database.GetAlertNodeDB().GetAlertNodeByIdAndNodeUuid(alert.ID, key.Key)
-		if err != nil {
-			log.Println(err)
 			continue
 		}
 
@@ -69,8 +63,8 @@ func CheckFieldsOfNode(newNode interface{}, key cache.KeyCache) (map[msgsender.K
 
 		switch alert.TypeChecker {
 		case checker.IntervalT.String():
-			diffVal, err = checker.Checker(alertNode.NormalFrom,
-				alertNode.NormalTo, value.String(), alert.TypeChecker)
+			diffVal, err = checker.Checker(alert.NormalFrom,
+				alert.NormalTo, value.String(), alert.TypeChecker)
 			if err != nil {
 				log.Println(err)
 				continue
@@ -101,12 +95,12 @@ func CheckFieldsOfNode(newNode interface{}, key cache.KeyCache) (map[msgsender.K
 			continue
 		}
 
-		if diffVal > alertNode.CriticalTo || diffVal < alertNode.CriticalFrom {
+		if diffVal > alert.CriticalTo || diffVal < alert.CriticalFrom {
 			msg.Frequency = msgsender.Max.String()
-			msg.Value = fmt.Sprintf(msgTemplateCritical, value.String(), alertNode.NormalFrom, alertNode.NormalTo)
-		} else if diffVal > alertNode.NormalTo || diffVal < alertNode.NormalFrom {
-			msg.Value = fmt.Sprintf(msgTemplateNormal, value.String(), alertNode.NormalFrom, alertNode.NormalTo)
-			msg.Frequency = alertNode.Frequency
+			msg.Value = fmt.Sprintf(msgTemplateCritical, value.String(), alert.NormalFrom, alert.NormalTo)
+		} else if diffVal > alert.NormalTo || diffVal < alert.NormalFrom {
+			msg.Value = fmt.Sprintf(msgTemplateNormal, value.String(), alert.NormalFrom, alert.NormalTo)
+			msg.Frequency = alert.Frequency
 		} else {
 			continue
 		}

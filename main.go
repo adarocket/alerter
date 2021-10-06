@@ -16,7 +16,7 @@ func main() {
 
 	database.InitDatabase("sqlDB.db")
 	database.CreateTables()
-	database.FillTables()
+	//database.FillTables()
 
 	web.WebUI = webUI
 	go func() {

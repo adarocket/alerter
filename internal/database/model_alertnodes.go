@@ -12,6 +12,20 @@ type ModelAlertNode interface {
 	CreateAlertNode(alertNode AlertNode) error
 	DeleteAlertNode(alertNodeID int64, nodeUuid string) error
 	UpdateAlertNode(table AlertNode) error
+	GetCrossAlertNodeAndAlert(nodeUuid string) ([]crossAlertNodeAndAlert, error)
+}
+
+type crossAlertNodeAndAlert struct {
+	Name         string
+	CheckedField string
+	TypeChecker  string
+	AlertID      int64
+	NormalFrom   float64
+	NormalTo     float64
+	CriticalFrom float64
+	CriticalTo   float64
+	Frequency    string
+	NodeUuid     string
 }
 
 type alertNodeDB struct {
@@ -20,6 +34,39 @@ type alertNodeDB struct {
 
 func GetAlertNodeDB() ModelAlertNode {
 	return alertNodeDB{dbConn: dbConn}
+}
+
+const crossAlertNodeAndAlertQuery = `
+	SELECT alert_id, normal_from, normal_to, critical_from, 
+	       critical_to, frequncy, node_uuid, name, checked_field, type_checker
+	FROM alert_node
+	INNER JOIN alerts a on alert_node.alert_id = a.id
+	AND  node_uuid = $2
+`
+
+func (p alertNodeDB) GetCrossAlertNodeAndAlert(nodeUuid string) ([]crossAlertNodeAndAlert, error) {
+	rows, err := p.dbConn.Query(crossAlertNodeAndAlertQuery, nodeUuid)
+	if err != nil {
+		log.Println(err)
+		return []crossAlertNodeAndAlert{}, err
+	}
+	defer rows.Close()
+
+	var nodes []crossAlertNodeAndAlert
+	for rows.Next() {
+		var node crossAlertNodeAndAlert
+		err = rows.Scan(&node.AlertID, &node.NormalFrom, &node.NormalTo, &node.CriticalFrom,
+			&node.CriticalTo, &node.Frequency, &node.NodeUuid, &node.Name,
+			&node.CheckedField, &node.TypeChecker)
+		if err != nil {
+			log.Println(err)
+			return []crossAlertNodeAndAlert{}, err
+		}
+
+		nodes = append(nodes, node)
+	}
+
+	return nodes, nil
 }
 
 const updateAlertNode = `
