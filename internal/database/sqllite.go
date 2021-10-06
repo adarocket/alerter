@@ -1,4 +1,4 @@
-package sqllite
+package database
 
 import (
 	"database/sql"
@@ -6,7 +6,7 @@ import (
 	"log"
 )
 
-var Sqllite sqlite
+var dbConn *sql.DB
 
 // InitDatabase ...
 func InitDatabase(sqlLitePathDB string) {
@@ -14,14 +14,9 @@ func InitDatabase(sqlLitePathDB string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	if err = db.Ping(); err != nil {
 		log.Fatal(err)
 	}
 
-	Sqllite.dbConn = db
-}
-
-type sqlite struct {
-	dbConn *sql.DB
+	dbConn = db
 }

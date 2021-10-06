@@ -1,26 +1,42 @@
-package sqllite
+package database
 
 import (
-	"github.com/adarocket/alerter/internal/database"
+	"database/sql"
 	"log"
 )
+
+type ModelAlert interface {
+	GetAlerts() ([]Alerts, error)
+	GetAlertByID(id int64) (Alerts, error)
+	CreateAlert(alert Alerts) error
+	DeleteAlert(alertID int64) error
+	UpdateAlert(table Alerts) error
+}
+
+type alertDB struct {
+	dbConn *sql.DB
+}
+
+func GetAlertDB() ModelAlert {
+	return alertDB{dbConn: dbConn}
+}
 
 const getAlerts = `
 	SELECT id, name, checked_field, type_checker
 	FROM alerts
 `
 
-func (p sqlite) GetAlerts() ([]database.Alerts, error) {
+func (p alertDB) GetAlerts() ([]Alerts, error) {
 	rows, err := p.dbConn.Query(getAlerts)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer rows.Close()
 
-	var alerts []database.Alerts
+	var alerts []Alerts
 
 	for rows.Next() {
-		alert := database.Alerts{}
+		alert := Alerts{}
 		err := rows.Scan(&alert.ID, &alert.Name, &alert.CheckedField, &alert.TypeChecker)
 		if err != nil {
 			log.Println(err)
@@ -39,21 +55,21 @@ const getAlertByID = `
 	WHERE id = $1
 `
 
-func (p sqlite) GetAlertByID(id int64) (database.Alerts, error) {
+func (p alertDB) GetAlertByID(id int64) (Alerts, error) {
 	rows, err := p.dbConn.Query(getAlertByID, id)
 	if err != nil {
 		log.Println(err)
-		return database.Alerts{}, err
+		return Alerts{}, err
 	}
 	defer rows.Close()
 
-	var alert database.Alerts
+	var alert Alerts
 
 	for rows.Next() {
 		err = rows.Scan(&alert.ID, &alert.Name, &alert.CheckedField, &alert.TypeChecker)
 		if err != nil {
 			log.Println(err)
-			return database.Alerts{}, err
+			return Alerts{}, err
 		}
 	}
 
@@ -67,7 +83,7 @@ const updateAlert = `
 	WHERE id = $4
 `
 
-func (p sqlite) UpdateAlert(alert database.Alerts) error {
+func (p alertDB) UpdateAlert(alert Alerts) error {
 	_, err := p.dbConn.Exec(updateAlert,
 		alert.Name, alert.CheckedField,
 		alert.TypeChecker, alert.ID)
@@ -86,7 +102,7 @@ const createAlert = `
 	VALUES ($1,$2, $3, $4)
 `
 
-func (p sqlite) CreateAlert(alert database.Alerts) error {
+func (p alertDB) CreateAlert(alert Alerts) error {
 	_, err := p.dbConn.Exec(createAlert,
 		alert.Name, alert.CheckedField,
 		alert.TypeChecker, alert.ID)
@@ -103,7 +119,7 @@ const deleteAlert = `
 	WHERE id = $1
 `
 
-func (p sqlite) DeleteAlert(alertID int64) error {
+func (p alertDB) DeleteAlert(alertID int64) error {
 	_, err := p.dbConn.Exec(deleteAlert, alertID)
 	if err != nil {
 		log.Println(err)

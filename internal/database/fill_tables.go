@@ -1,4 +1,4 @@
-package sqllite
+package database
 
 import (
 	"log"
@@ -20,13 +20,13 @@ const fillAlertsNodeTable = `
 	       (2, 0.0, 10.0, 10.0, 20.0, 'Max', '08e792fd-2a19-466f-9a2a-d9fd40bdf9d1')
 `
 
-func (p sqlite) FillTables() error {
-	_, err := p.dbConn.Exec(fillAlertsTable)
+func FillTables() error {
+	_, err := dbConn.Exec(fillAlertsTable)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	_, err = p.dbConn.Exec(fillAlertsNodeTable)
+	_, err = dbConn.Exec(fillAlertsNodeTable)
 	if err != nil {
 		log.Fatal(err)
 	}

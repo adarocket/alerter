@@ -25,7 +25,7 @@ func getAlertNodesListByID(c *gin.Context) {
 		return
 	}
 
-	alertNodes, err := database.Db.GetAlertNodesByID(id)
+	alertNodes, err := database.GetAlertNodeDB().GetAlertNodesByID(id)
 	if err != nil {
 		log.Println(err)
 		http.Error(c.Writer, "internal server error", http.StatusInternalServerError)
@@ -90,7 +90,7 @@ func createAlertNode(c *gin.Context) {
 		NodeUuid:     nodeUuid,
 	}
 
-	err = database.Db.CreateAlertNode(alertNode)
+	err = database.GetAlertNodeDB().CreateAlertNode(alertNode)
 	if err != nil {
 		log.Println(err)
 		http.Error(c.Writer, "internal server error", http.StatusInternalServerError)
@@ -109,7 +109,7 @@ func GetAlertNodeByIDAndUuid(c *gin.Context) {
 		return
 	}
 
-	alertNode, err := database.Db.GetAlertNodeByIdAndNodeUuid(id, c.Param("uuid"))
+	alertNode, err := database.GetAlertNodeDB().GetAlertNodeByIdAndNodeUuid(id, c.Param("uuid"))
 	if err != nil {
 		log.Println(err)
 		http.Error(c.Writer, "internal server error", http.StatusInternalServerError)
@@ -167,7 +167,7 @@ func updateAlertNode(c *gin.Context) {
 	alertNode.AlertID = id
 	alertNode.NodeUuid = c.Request.FormValue("NodeUuid")
 
-	err = database.Db.UpdateAlertNode(alertNode)
+	err = database.GetAlertNodeDB().UpdateAlertNode(alertNode)
 	if err != nil {
 		log.Println(err)
 		http.Error(c.Writer, "internal server error", http.StatusInternalServerError)
@@ -204,7 +204,7 @@ func deleteAlertNode(c *gin.Context) {
 
 	nodeUuid := c.Param("uuid")
 
-	err = database.Db.DeleteAlertNode(id, nodeUuid)
+	err = database.GetAlertNodeDB().DeleteAlertNode(id, nodeUuid)
 	if err != nil {
 		log.Println(err)
 		http.Error(c.Writer, "internal server error", http.StatusInternalServerError)

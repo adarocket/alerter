@@ -1,10 +1,26 @@
-package sqllite
+package database
 
 import (
+	"database/sql"
 	"errors"
-	"github.com/adarocket/alerter/internal/database"
 	"log"
 )
+
+type ModelAlertNode interface {
+	GetAlertNodeByIdAndNodeUuid(alertId int64, nodeUuid string) (AlertNode, error)
+	GetAlertNodesByID(alertId int64) ([]AlertNode, error)
+	CreateAlertNode(alertNode AlertNode) error
+	DeleteAlertNode(alertNodeID int64, nodeUuid string) error
+	UpdateAlertNode(table AlertNode) error
+}
+
+type alertNodeDB struct {
+	dbConn *sql.DB
+}
+
+func GetAlertNodeDB() ModelAlertNode {
+	return alertNodeDB{dbConn: dbConn}
+}
 
 const updateAlertNode = `
 	UPDATE alert_node
@@ -19,7 +35,7 @@ const updateAlertNode = `
     	node_uuid = $1 AND alert_id = $2
 `
 
-func (p sqlite) UpdateAlertNode(alertNode database.AlertNode) error {
+func (p alertNodeDB) UpdateAlertNode(alertNode AlertNode) error {
 	_, err := p.dbConn.Exec(updateAlertNode,
 		alertNode.NodeUuid, alertNode.AlertID, alertNode.CriticalFrom, alertNode.CriticalTo,
 		alertNode.NormalFrom, alertNode.NormalTo, alertNode.Frequency)
@@ -38,18 +54,18 @@ const getAlertNodes = `
 	WHERE alert_id = $1
 `
 
-func (p sqlite) GetAlertNodesByID(alertId int64) ([]database.AlertNode, error) {
+func (p alertNodeDB) GetAlertNodesByID(alertId int64) ([]AlertNode, error) {
 	rows, err := p.dbConn.Query(getAlertNodes, alertId)
 	if err != nil {
 		log.Println(err)
-		return []database.AlertNode{}, err
+		return []AlertNode{}, err
 	}
 	defer rows.Close()
 
-	alertNodes := make([]database.AlertNode, 0, 10)
+	alertNodes := make([]AlertNode, 0, 10)
 
 	for rows.Next() {
-		var alertNode database.AlertNode
+		var alertNode AlertNode
 		err = rows.Scan(&alertNode.AlertID, &alertNode.NormalFrom,
 			&alertNode.NormalTo, &alertNode.CriticalFrom,
 			&alertNode.CriticalTo, &alertNode.Frequency, &alertNode.NodeUuid)
@@ -70,15 +86,15 @@ const getAlertNode = `
 	WHERE alert_id = $1 AND node_uuid = $2
 `
 
-func (p sqlite) GetAlertNodeByIdAndNodeUuid(alertId int64, nodeUuid string) (database.AlertNode, error) {
+func (p alertNodeDB) GetAlertNodeByIdAndNodeUuid(alertId int64, nodeUuid string) (AlertNode, error) {
 	rows, err := p.dbConn.Query(getAlertNode, alertId, nodeUuid)
 	if err != nil {
 		log.Println(err)
-		return database.AlertNode{}, err
+		return AlertNode{}, err
 	}
 	defer rows.Close()
 
-	var alertNode database.AlertNode
+	var alertNode AlertNode
 
 	for rows.Next() {
 		err = rows.Scan(&alertNode.AlertID, &alertNode.NormalFrom,
@@ -86,7 +102,7 @@ func (p sqlite) GetAlertNodeByIdAndNodeUuid(alertId int64, nodeUuid string) (dat
 			&alertNode.CriticalTo, &alertNode.Frequency, &alertNode.NodeUuid)
 		if err != nil {
 			log.Println(err)
-			return database.AlertNode{}, err
+			return AlertNode{}, err
 		}
 
 		return alertNode, nil
@@ -101,7 +117,7 @@ const createAlertNode = `
 	VALUES ($1, $2, $3, $4, $5, $6, $7)
 `
 
-func (p sqlite) CreateAlertNode(alertNode database.AlertNode) error {
+func (p alertNodeDB) CreateAlertNode(alertNode AlertNode) error {
 	_, err := p.dbConn.Exec(createAlertNode,
 		alertNode.NormalFrom, alertNode.NormalTo, alertNode.CriticalFrom,
 		alertNode.CriticalTo, alertNode.Frequency, alertNode.AlertID, alertNode.NodeUuid)
@@ -118,7 +134,7 @@ const deleteAlertNode = `
 	WHERE alert_id = $1 AND node_uuid = $2
 `
 
-func (p sqlite) DeleteAlertNode(alertNodeID int64, nodeUuid string) error {
+func (p alertNodeDB) DeleteAlertNode(alertNodeID int64, nodeUuid string) error {
 	_, err := p.dbConn.Exec(deleteAlertNode, alertNodeID, nodeUuid)
 	if err != nil {
 		log.Println(err)

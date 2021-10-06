@@ -1,4 +1,4 @@
-package sqllite
+package database
 
 import "log"
 
@@ -23,13 +23,13 @@ const createTableAlertsCardano = `
 	PRIMARY KEY("id"))
 `
 
-func (p sqlite) CreateTables() error {
-	if _, err := p.dbConn.Exec(createTableAlertNodeCardano); err != nil {
+func CreateTables() error {
+	if _, err := dbConn.Exec(createTableAlertNodeCardano); err != nil {
 		log.Println("CreateNodeAuthTable", err)
 		return err
 	}
 
-	if _, err := p.dbConn.Exec(createTableAlertsCardano); err != nil {
+	if _, err := dbConn.Exec(createTableAlertsCardano); err != nil {
 		log.Println("CreateNodeAuthTable", err)
 		return err
 	}
