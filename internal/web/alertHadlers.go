@@ -1,6 +1,7 @@
 package web
 
 import (
+	"github.com/adarocket/alerter/internal/controller"
 	database2 "github.com/adarocket/alerter/internal/database"
 	"github.com/gin-gonic/gin"
 	"html/template"
@@ -25,7 +26,8 @@ func getAlertByID(c *gin.Context) {
 		return
 	}
 
-	alerts, err := database2.NewAlertInstance().GetAlertByID(id)
+	db := controller.GetControllerInstance().Alert
+	alerts, err := db.GetAlertByID(id)
 	if err != nil {
 		log.Println(err)
 		http.Error(c.Writer, "internal server error", http.StatusInternalServerError)
@@ -57,7 +59,8 @@ func updateAlert(c *gin.Context) {
 	}
 	alertNode.ID = id
 
-	err = database2.NewAlertInstance().UpdateAlert(alertNode)
+	db := controller.GetControllerInstance().Alert
+	err = db.UpdateAlert(alertNode)
 	if err != nil {
 		log.Println(err)
 		http.Error(c.Writer, "internal server error", http.StatusInternalServerError)
@@ -75,7 +78,8 @@ func getAlertsList(c *gin.Context) {
 		return
 	}
 
-	alerts, err := database2.NewAlertInstance().GetAlerts()
+	db := controller.GetControllerInstance().Alert
+	alerts, err := db.GetAlerts()
 	if err != nil {
 		log.Println(err)
 		http.Error(c.Writer, "internal server error", http.StatusInternalServerError)
@@ -123,7 +127,8 @@ func createAlert(c *gin.Context) {
 	}
 	alertNode.ID = id
 
-	err = database2.NewAlertInstance().CreateAlert(alertNode)
+	db := controller.GetControllerInstance().Alert
+	err = db.CreateAlert(alertNode)
 	if err != nil {
 		log.Println(err)
 		http.Error(c.Writer, "internal server error", http.StatusInternalServerError)
@@ -142,7 +147,8 @@ func deleteAlert(c *gin.Context) {
 		return
 	}
 
-	err = database2.NewAlertInstance().DeleteAlert(id)
+	db := controller.GetControllerInstance().Alert
+	err = db.DeleteAlert(id)
 	if err != nil {
 		log.Println(err)
 		http.Error(c.Writer, "internal server error", http.StatusInternalServerError)

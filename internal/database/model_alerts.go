@@ -17,7 +17,7 @@ type alertDB struct {
 	dbConn *sql.DB
 }
 
-func NewAlertInstance() ModelAlert {
+func NewAlertInstance(dbConn *sql.DB) ModelAlert {
 	return &alertDB{dbConn: dbConn}
 }
 

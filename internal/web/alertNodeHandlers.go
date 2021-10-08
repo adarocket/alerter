@@ -1,6 +1,7 @@
 package web
 
 import (
+	"github.com/adarocket/alerter/internal/controller"
 	"github.com/adarocket/alerter/internal/database"
 	"github.com/gin-gonic/gin"
 	"html/template"
@@ -25,7 +26,8 @@ func getAlertNodesListByID(c *gin.Context) {
 		return
 	}
 
-	alertNodes, err := database.NewAlertNodeInstance().GetAlertNodesByID(id)
+	db := controller.GetControllerInstance().AlertNode
+	alertNodes, err := db.GetAlertNodesByID(id)
 	if err != nil {
 		log.Println(err)
 		http.Error(c.Writer, "internal server error", http.StatusInternalServerError)
@@ -90,7 +92,8 @@ func createAlertNode(c *gin.Context) {
 		NodeUuid:     nodeUuid,
 	}
 
-	err = database.NewAlertNodeInstance().CreateAlertNode(alertNode)
+	db := controller.GetControllerInstance().AlertNode
+	err = db.CreateAlertNode(alertNode)
 	if err != nil {
 		log.Println(err)
 		http.Error(c.Writer, "internal server error", http.StatusInternalServerError)
@@ -109,7 +112,8 @@ func GetAlertNodeByIDAndUuid(c *gin.Context) {
 		return
 	}
 
-	alertNode, err := database.NewAlertNodeInstance().GetAlertNodeByIdAndNodeUuid(id, c.Param("uuid"))
+	db := controller.GetControllerInstance().AlertNode
+	alertNode, err := db.GetAlertNodeByIdAndNodeUuid(id, c.Param("uuid"))
 	if err != nil {
 		log.Println(err)
 		http.Error(c.Writer, "internal server error", http.StatusInternalServerError)
@@ -167,7 +171,8 @@ func updateAlertNode(c *gin.Context) {
 	alertNode.AlertID = id
 	alertNode.NodeUuid = c.Request.FormValue("NodeUuid")
 
-	err = database.NewAlertNodeInstance().UpdateAlertNode(alertNode)
+	db := controller.GetControllerInstance().AlertNode
+	err = db.UpdateAlertNode(alertNode)
 	if err != nil {
 		log.Println(err)
 		http.Error(c.Writer, "internal server error", http.StatusInternalServerError)
@@ -204,7 +209,8 @@ func deleteAlertNode(c *gin.Context) {
 
 	nodeUuid := c.Param("uuid")
 
-	err = database.NewAlertNodeInstance().DeleteAlertNode(id, nodeUuid)
+	db := controller.GetControllerInstance().AlertNode
+	err = db.DeleteAlertNode(id, nodeUuid)
 	if err != nil {
 		log.Println(err)
 		http.Error(c.Writer, "internal server error", http.StatusInternalServerError)

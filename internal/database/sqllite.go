@@ -6,10 +6,8 @@ import (
 	"log"
 )
 
-var dbConn *sql.DB
-
 // InitDatabase ...
-func InitDatabase(sqlLitePathDB string) {
+func InitDatabase(sqlLitePathDB string) *sql.DB {
 	db, err := sql.Open("sqlite3", sqlLitePathDB)
 	if err != nil {
 		log.Fatal(err)
@@ -18,5 +16,5 @@ func InitDatabase(sqlLitePathDB string) {
 		log.Fatal(err)
 	}
 
-	dbConn = db
+	return db
 }
