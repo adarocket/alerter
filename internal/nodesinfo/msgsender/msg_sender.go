@@ -41,7 +41,7 @@ func (s *MsgSender) updateNotifierInStack(notifier *notifier.SendNotifier, keyMs
 			delete(s.stack, keyMsgSender)
 			s.notifyClient.SendMessage(notifier)
 		} else {
-			val.tickSend = val.tickSend - 1
+			val.tickSend--
 			val.notify = notifier
 			s.stack[keyMsgSender] = val
 		}
@@ -73,7 +73,7 @@ func (s *MsgSender) AddNotifiersToStack(messages map[KeyMsgSender]*notifier.Send
 		}
 	}
 
-	for sender, sendNotifier := range messages {
-		s.updateNotifierInStack(sendNotifier, sender)
+	for key, notifier := range messages {
+		s.updateNotifierInStack(notifier, key)
 	}
 }
