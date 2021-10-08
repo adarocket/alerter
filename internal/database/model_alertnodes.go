@@ -32,7 +32,7 @@ type alertNodeDB struct {
 	dbConn *sql.DB
 }
 
-func GetAlertNodeDB() ModelAlertNode {
+func NewAlertNodeInstance() ModelAlertNode {
 	return alertNodeDB{dbConn: dbConn}
 }
 

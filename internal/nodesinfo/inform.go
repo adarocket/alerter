@@ -33,7 +33,7 @@ func CheckFieldsOfNode(newNode interface{}, key cache.KeyCache) (map[msgsender.K
 		return nil, err
 	}
 
-	alerts, err := database.GetAlertNodeDB().GetCrossAlertNodeAndAlert(key.Key)
+	alerts, err := database.NewAlertNodeInstance().GetCrossAlertNodeAndAlert(key.Key)
 	if err != nil {
 		log.Println(err)
 		return nil, err
