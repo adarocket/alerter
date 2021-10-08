@@ -4,6 +4,7 @@ import (
 	"embed"
 	_ "embed"
 	"fmt"
+	"github.com/adarocket/alerter/internal/controller"
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
@@ -29,28 +30,31 @@ func authMw(c *gin.Context) {
 }
 
 func StartServer(webServerAddr string) {
+	alertHandlers := GetAlertHandlersInstance(controller.GetAlertControllerInstance())
+	alertNodeController := GetAlertNodeHandlersInstance(controller.GetAlertNodeControllerInstance())
+
 	router := gin.Default()
 	router.Use(authMw)
 
 	alertGroup := router.Group("/alert")
 	{
-		alertGroup.GET("/:id/edit", getAlertByID)
-		alertGroup.GET("/:id/delete", deleteAlert)
-		alertGroup.GET("/create", getEmptyAlertTmpl)
-		alertGroup.POST("/create", createAlert)
-		alertGroup.POST("/:id/edit", updateAlert)
+		alertGroup.GET("/:id/edit", alertHandlers.getAlertByID)
+		alertGroup.GET("/:id/delete", alertHandlers.deleteAlert)
+		alertGroup.GET("/create", alertHandlers.getEmptyAlertTmpl)
+		alertGroup.POST("/create", alertHandlers.createAlert)
+		alertGroup.POST("/:id/edit", alertHandlers.updateAlert)
 	}
 	alertNodeGroup := router.Group("/alertNode")
 	{
-		alertNodeGroup.GET("/:id/:uuid/edit", GetAlertNodeByIDAndUuid)
-		alertNodeGroup.POST("/edit", updateAlertNode)
-		alertNodeGroup.GET("/create", getEmptyAlertNodeTmpl)
-		alertNodeGroup.POST("/create", createAlertNode)
-		alertNodeGroup.GET("/:id/:uuid/delete", deleteAlertNode)
+		alertNodeGroup.GET("/:id/:uuid/edit", alertNodeController.GetAlertNodeByIDAndUuid)
+		alertNodeGroup.POST("/edit", alertNodeController.updateAlertNode)
+		alertNodeGroup.GET("/create", alertNodeController.getEmptyAlertNodeTmpl)
+		alertNodeGroup.POST("/create", alertNodeController.createAlertNode)
+		alertNodeGroup.GET("/:id/:uuid/delete", alertNodeController.deleteAlertNode)
 	}
 
-	router.GET("/alertNodes/:id", getAlertNodesListByID)
-	router.GET(homePage, getAlertsList)
+	router.GET("/alertNodes/:id", alertNodeController.getAlertNodesListByID)
+	router.GET(homePage, alertHandlers.getAlertsList)
 	http.Handle("/", router)
 
 	fmt.Println("Server is listening...  http://127.0.0.1:8080/alerts")

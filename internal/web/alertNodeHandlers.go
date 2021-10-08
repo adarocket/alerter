@@ -10,7 +10,15 @@ import (
 	"strconv"
 )
 
-func getAlertNodesListByID(c *gin.Context) {
+type AlertNodeHandlers struct {
+	alertNodeController controller.AlertNode
+}
+
+func GetAlertNodeHandlersInstance(cont controller.AlertNode) AlertNodeHandlers {
+	return AlertNodeHandlers{alertNodeController: cont}
+}
+
+func (a *AlertNodeHandlers) getAlertNodesListByID(c *gin.Context) {
 	tmpl, err := template.ParseFS(WebUI, "data/getAlertNodes.html")
 	if err != nil {
 		log.Println(err)
@@ -26,8 +34,7 @@ func getAlertNodesListByID(c *gin.Context) {
 		return
 	}
 
-	db := controller.GetControllerInstance().AlertNode
-	alertNodes, err := db.GetAlertNodesByID(id)
+	alertNodes, err := a.alertNodeController.GetAlertNodesByID(id)
 	if err != nil {
 		log.Println(err)
 		http.Error(c.Writer, "internal server error", http.StatusInternalServerError)
@@ -42,7 +49,7 @@ func getAlertNodesListByID(c *gin.Context) {
 	}
 }
 
-func createAlertNode(c *gin.Context) {
+func (a *AlertNodeHandlers) createAlertNode(c *gin.Context) {
 	idStr := c.Request.FormValue("AlertID")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
@@ -92,8 +99,7 @@ func createAlertNode(c *gin.Context) {
 		NodeUuid:     nodeUuid,
 	}
 
-	db := controller.GetControllerInstance().AlertNode
-	err = db.CreateAlertNode(alertNode)
+	err = a.alertNodeController.CreateAlertNode(alertNode)
 	if err != nil {
 		log.Println(err)
 		http.Error(c.Writer, "internal server error", http.StatusInternalServerError)
@@ -103,7 +109,7 @@ func createAlertNode(c *gin.Context) {
 	http.Redirect(c.Writer, c.Request, c.Request.URL.Host+homePage, http.StatusFound)
 }
 
-func GetAlertNodeByIDAndUuid(c *gin.Context) {
+func (a *AlertNodeHandlers) GetAlertNodeByIDAndUuid(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
@@ -112,8 +118,7 @@ func GetAlertNodeByIDAndUuid(c *gin.Context) {
 		return
 	}
 
-	db := controller.GetControllerInstance().AlertNode
-	alertNode, err := db.GetAlertNodeByIdAndNodeUuid(id, c.Param("uuid"))
+	alertNode, err := a.alertNodeController.GetAlertNodeByIdAndNodeUuid(id, c.Param("uuid"))
 	if err != nil {
 		log.Println(err)
 		http.Error(c.Writer, "internal server error", http.StatusInternalServerError)
@@ -135,7 +140,7 @@ func GetAlertNodeByIDAndUuid(c *gin.Context) {
 	}
 }
 
-func updateAlertNode(c *gin.Context) {
+func (a *AlertNodeHandlers) updateAlertNode(c *gin.Context) {
 	alertNode := database.AlertNode{}
 	var err error
 	if alertNode.NormalFrom, err = strconv.ParseFloat(c.Request.FormValue("NormalFrom"), 64); err != nil {
@@ -171,8 +176,7 @@ func updateAlertNode(c *gin.Context) {
 	alertNode.AlertID = id
 	alertNode.NodeUuid = c.Request.FormValue("NodeUuid")
 
-	db := controller.GetControllerInstance().AlertNode
-	err = db.UpdateAlertNode(alertNode)
+	err = a.alertNodeController.UpdateAlertNode(alertNode)
 	if err != nil {
 		log.Println(err)
 		http.Error(c.Writer, "internal server error", http.StatusInternalServerError)
@@ -182,7 +186,7 @@ func updateAlertNode(c *gin.Context) {
 	http.Redirect(c.Writer, c.Request, c.Request.URL.Host+homePage, http.StatusFound)
 }
 
-func getEmptyAlertNodeTmpl(c *gin.Context) {
+func (a *AlertNodeHandlers) getEmptyAlertNodeTmpl(c *gin.Context) {
 	tmpl, err := template.ParseFS(WebUI, "data/getEmptyAlertNode.html")
 	if err != nil {
 		log.Println(err)
@@ -198,7 +202,7 @@ func getEmptyAlertNodeTmpl(c *gin.Context) {
 	}
 }
 
-func deleteAlertNode(c *gin.Context) {
+func (a *AlertNodeHandlers) deleteAlertNode(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
@@ -209,8 +213,7 @@ func deleteAlertNode(c *gin.Context) {
 
 	nodeUuid := c.Param("uuid")
 
-	db := controller.GetControllerInstance().AlertNode
-	err = db.DeleteAlertNode(id, nodeUuid)
+	err = a.alertNodeController.DeleteAlertNode(id, nodeUuid)
 	if err != nil {
 		log.Println(err)
 		http.Error(c.Writer, "internal server error", http.StatusInternalServerError)
