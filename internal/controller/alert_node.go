@@ -5,11 +5,11 @@ import (
 	"log"
 )
 
-type alertNode struct {
+type AlertNode struct {
 	db database.ModelAlertNode
 }
 
-func (c *alertNode) GetAlertNodesByID(alertNodeID int64) ([]database.AlertNode, error) {
+func (c *AlertNode) GetAlertNodesByID(alertNodeID int64) ([]database.AlertNode, error) {
 	objs, err := c.db.GetAlertNodesByID(alertNodeID)
 	if err != nil {
 		log.Println(err)
@@ -19,7 +19,7 @@ func (c *alertNode) GetAlertNodesByID(alertNodeID int64) ([]database.AlertNode, 
 	return objs, nil
 }
 
-func (c *alertNode) GetCrossAlertNodeAndAlert(nodeUuid string) ([]database.CrossAlertNodeAndAlert, error) {
+func (c *AlertNode) GetCrossAlertNodeAndAlert(nodeUuid string) ([]database.CrossAlertNodeAndAlert, error) {
 	objs, err := c.db.GetCrossAlertNodeAndAlert(nodeUuid)
 	if err != nil {
 		log.Println(err)
@@ -29,7 +29,7 @@ func (c *alertNode) GetCrossAlertNodeAndAlert(nodeUuid string) ([]database.Cross
 	return objs, nil
 }
 
-func (c *alertNode) GetAlertNodeByIdAndNodeUuid(alertId int64, nodeUuid string) (database.AlertNode, error) {
+func (c *AlertNode) GetAlertNodeByIdAndNodeUuid(alertId int64, nodeUuid string) (database.AlertNode, error) {
 	objs, err := c.db.GetAlertNodeByIdAndNodeUuid(alertId, nodeUuid)
 	if err != nil {
 		log.Println(err)
@@ -39,7 +39,7 @@ func (c *alertNode) GetAlertNodeByIdAndNodeUuid(alertId int64, nodeUuid string) 
 	return objs, nil
 }
 
-func (c *alertNode) CreateAlertNode(alertNode database.AlertNode) error {
+func (c *AlertNode) CreateAlertNode(alertNode database.AlertNode) error {
 	err := c.db.CreateAlertNode(alertNode)
 	if err != nil {
 		log.Println(err)
@@ -49,7 +49,7 @@ func (c *alertNode) CreateAlertNode(alertNode database.AlertNode) error {
 	return nil
 }
 
-func (c *alertNode) DeleteAlertNode(alertNodeID int64, nodeUuid string) error {
+func (c *AlertNode) DeleteAlertNode(alertNodeID int64, nodeUuid string) error {
 	err := c.db.DeleteAlertNode(alertNodeID, nodeUuid)
 	if err != nil {
 		log.Println(err)
@@ -59,7 +59,7 @@ func (c *alertNode) DeleteAlertNode(alertNodeID int64, nodeUuid string) error {
 	return nil
 }
 
-func (c *alertNode) UpdateAlertNode(alertNode database.AlertNode) error {
+func (c *AlertNode) UpdateAlertNode(alertNode database.AlertNode) error {
 	err := c.db.UpdateAlertNode(alertNode)
 	if err != nil {
 		log.Println(err)
