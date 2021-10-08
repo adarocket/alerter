@@ -24,20 +24,16 @@ var once sync.Once
 var config Config
 
 func LoadConfig() (loadedConfig Config, err error) {
-	var errReturn error
-
 	once.Do(func() {
 		//usrHomePath, err := goconfig.GetUserHomePath()
 		if err == nil {
 			err = goconfig.LoadConfig(cConfigPath, &loadedConfig)
 			if err != nil {
 				log.Fatal(err)
-				errReturn = err
 			}
 			config = loadedConfig
 		} else {
 			log.Fatal(err)
-			errReturn = err
 		}
 	})
 
