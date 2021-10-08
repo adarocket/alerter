@@ -1,16 +1,14 @@
 package msgsender
 
 import (
-	"fmt"
 	"github.com/adarocket/alerter/internal/client"
 	"github.com/adarocket/proto/proto-gen/notifier"
 	"log"
-	"time"
 )
 
 type MsgSender struct {
 	notifyClient *client.NotifierClient
-	stack        map[KeyMsgSender]*notifier.SendNotifier
+	stack        map[KeyMsgSender]ValueMsgSender
 }
 
 type KeyMsgSender struct {
@@ -18,8 +16,13 @@ type KeyMsgSender struct {
 	NodeField string
 }
 
+type ValueMsgSender struct {
+	notify   *notifier.SendNotifier
+	tickSend int64
+}
+
 func CreateMsgSender(notifyClient *client.NotifierClient) MsgSender {
-	newMap := make(map[KeyMsgSender]*notifier.SendNotifier)
+	newMap := make(map[KeyMsgSender]ValueMsgSender)
 	return MsgSender{
 		notifyClient: notifyClient,
 		stack:        newMap,
@@ -33,29 +36,28 @@ func (s *MsgSender) updateNotifierInStack(notifier *notifier.SendNotifier, keyMs
 	} else if notifier.Frequency == Max.String() {
 		s.notifyClient.SendMessage(notifier)
 	} else if exist {
-		s.stack[keyMsgSender] = notifier
-	} else {
-		go func() {
-			s.stack[keyMsgSender] = notifier
+		val := s.stack[keyMsgSender]
+		if (val.tickSend - 1) <= 0 {
+			delete(s.stack, keyMsgSender)
 			s.notifyClient.SendMessage(notifier)
+		} else {
+			val.tickSend = val.tickSend - 1
+			val.notify = notifier
+			s.stack[keyMsgSender] = val
+		}
+	} else {
+		valueMsgSender := ValueMsgSender{}
+		s.notifyClient.SendMessage(notifier)
 
-			tmDur, err := GetTimeFrequency(notifier.GetFrequency())
-			if err != nil {
-				log.Println(err)
-				return
-			}
+		tickDur, err := GetTickFrequency(notifier.GetFrequency())
+		if err != nil {
+			log.Println(err)
+			return
+		}
 
-			for {
-				time.Sleep(tmDur)
-				if val, existAfter := s.stack[keyMsgSender]; existAfter {
-					fmt.Println("Send msg")
-					s.notifyClient.SendMessage(val)
-				} else {
-					fmt.Println("delete this")
-					return
-				}
-			}
-		}()
+		valueMsgSender.tickSend = tickDur
+		valueMsgSender.notify = notifier
+		s.stack[keyMsgSender] = valueMsgSender
 	}
 }
 

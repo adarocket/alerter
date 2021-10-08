@@ -2,7 +2,6 @@ package msgsender
 
 import (
 	"errors"
-	"time"
 )
 
 type TypeFrequency int
@@ -19,24 +18,24 @@ var frequencyTypes = [...]string{
 	"max",
 }
 
-var frequencyTypesTime = [...]time.Duration{
-	time.Minute * 10,
-	time.Minute,
-	time.Second,
+var tickSend = [...]int64{
+	20,
+	10,
+	1,
 }
 
 func (tf TypeFrequency) String() string {
 	return frequencyTypes[tf-1]
 }
 
-func (tf TypeFrequency) GetTime() time.Duration {
-	return frequencyTypesTime[tf-1]
+func (tf TypeFrequency) GetTick() int64 {
+	return tickSend[tf-1]
 }
 
-func GetTimeFrequency(frequency string) (time.Duration, error) {
+func GetTickFrequency(frequency string) (int64, error) {
 	for i, frequencyType := range frequencyTypes {
 		if frequency == frequencyType {
-			return frequencyTypesTime[i], nil
+			return tickSend[i], nil
 		}
 	}
 

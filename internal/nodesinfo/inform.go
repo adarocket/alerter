@@ -96,7 +96,7 @@ func CheckFieldsOfNode(newNode interface{}, key cache.KeyCache) (map[msgsender.K
 		}
 
 		if diffVal > alert.CriticalTo || diffVal < alert.CriticalFrom {
-			msg.Frequency = msgsender.Max.String()
+			msg.Frequency = msgsender.Normal.String()
 			msg.Value = fmt.Sprintf(msgTemplateCritical, value.String(), alert.NormalFrom, alert.NormalTo)
 		} else if diffVal > alert.NormalTo || diffVal < alert.NormalFrom {
 			msg.Value = fmt.Sprintf(msgTemplateNormal, value.String(), alert.NormalFrom, alert.NormalTo)
