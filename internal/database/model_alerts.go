@@ -18,7 +18,7 @@ type alertDB struct {
 }
 
 func NewAlertInstance() ModelAlert {
-	return alertDB{dbConn: dbConn}
+	return &alertDB{dbConn: dbConn}
 }
 
 const getAlerts = `
@@ -26,7 +26,7 @@ const getAlerts = `
 	FROM alerts
 `
 
-func (p alertDB) GetAlerts() ([]Alerts, error) {
+func (p *alertDB) GetAlerts() ([]Alerts, error) {
 	rows, err := p.dbConn.Query(getAlerts)
 	if err != nil {
 		log.Fatal(err)
@@ -83,7 +83,7 @@ const updateAlert = `
 	WHERE id = $4
 `
 
-func (p alertDB) UpdateAlert(alert Alerts) error {
+func (p *alertDB) UpdateAlert(alert Alerts) error {
 	_, err := p.dbConn.Exec(updateAlert,
 		alert.Name, alert.CheckedField,
 		alert.TypeChecker, alert.ID)
@@ -102,7 +102,7 @@ const createAlert = `
 	VALUES ($1,$2, $3, $4)
 `
 
-func (p alertDB) CreateAlert(alert Alerts) error {
+func (p *alertDB) CreateAlert(alert Alerts) error {
 	_, err := p.dbConn.Exec(createAlert,
 		alert.Name, alert.CheckedField,
 		alert.TypeChecker, alert.ID)
@@ -119,7 +119,7 @@ const deleteAlert = `
 	WHERE id = $1
 `
 
-func (p alertDB) DeleteAlert(alertID int64) error {
+func (p *alertDB) DeleteAlert(alertID int64) error {
 	_, err := p.dbConn.Exec(deleteAlert, alertID)
 	if err != nil {
 		log.Println(err)

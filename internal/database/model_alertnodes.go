@@ -33,7 +33,7 @@ type alertNodeDB struct {
 }
 
 func NewAlertNodeInstance() ModelAlertNode {
-	return alertNodeDB{dbConn: dbConn}
+	return &alertNodeDB{dbConn: dbConn}
 }
 
 const crossAlertNodeAndAlertQuery = `
@@ -44,7 +44,7 @@ const crossAlertNodeAndAlertQuery = `
 	AND  node_uuid = $2
 `
 
-func (p alertNodeDB) GetCrossAlertNodeAndAlert(nodeUuid string) ([]crossAlertNodeAndAlert, error) {
+func (p *alertNodeDB) GetCrossAlertNodeAndAlert(nodeUuid string) ([]crossAlertNodeAndAlert, error) {
 	rows, err := p.dbConn.Query(crossAlertNodeAndAlertQuery, nodeUuid)
 	if err != nil {
 		log.Println(err)
@@ -82,7 +82,7 @@ const updateAlertNode = `
     	node_uuid = $1 AND alert_id = $2
 `
 
-func (p alertNodeDB) UpdateAlertNode(alertNode AlertNode) error {
+func (p *alertNodeDB) UpdateAlertNode(alertNode AlertNode) error {
 	_, err := p.dbConn.Exec(updateAlertNode,
 		alertNode.NodeUuid, alertNode.AlertID, alertNode.CriticalFrom, alertNode.CriticalTo,
 		alertNode.NormalFrom, alertNode.NormalTo, alertNode.Frequency)
@@ -101,7 +101,7 @@ const getAlertNodes = `
 	WHERE alert_id = $1
 `
 
-func (p alertNodeDB) GetAlertNodesByID(alertId int64) ([]AlertNode, error) {
+func (p *alertNodeDB) GetAlertNodesByID(alertId int64) ([]AlertNode, error) {
 	rows, err := p.dbConn.Query(getAlertNodes, alertId)
 	if err != nil {
 		log.Println(err)
@@ -133,7 +133,7 @@ const getAlertNode = `
 	WHERE alert_id = $1 AND node_uuid = $2
 `
 
-func (p alertNodeDB) GetAlertNodeByIdAndNodeUuid(alertId int64, nodeUuid string) (AlertNode, error) {
+func (p *alertNodeDB) GetAlertNodeByIdAndNodeUuid(alertId int64, nodeUuid string) (AlertNode, error) {
 	rows, err := p.dbConn.Query(getAlertNode, alertId, nodeUuid)
 	if err != nil {
 		log.Println(err)
@@ -164,7 +164,7 @@ const createAlertNode = `
 	VALUES ($1, $2, $3, $4, $5, $6, $7)
 `
 
-func (p alertNodeDB) CreateAlertNode(alertNode AlertNode) error {
+func (p *alertNodeDB) CreateAlertNode(alertNode AlertNode) error {
 	_, err := p.dbConn.Exec(createAlertNode,
 		alertNode.NormalFrom, alertNode.NormalTo, alertNode.CriticalFrom,
 		alertNode.CriticalTo, alertNode.Frequency, alertNode.AlertID, alertNode.NodeUuid)
@@ -181,7 +181,7 @@ const deleteAlertNode = `
 	WHERE alert_id = $1 AND node_uuid = $2
 `
 
-func (p alertNodeDB) DeleteAlertNode(alertNodeID int64, nodeUuid string) error {
+func (p *alertNodeDB) DeleteAlertNode(alertNodeID int64, nodeUuid string) error {
 	_, err := p.dbConn.Exec(deleteAlertNode, alertNodeID, nodeUuid)
 	if err != nil {
 		log.Println(err)
