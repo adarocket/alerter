@@ -35,6 +35,8 @@ func StartServer(webServerAddr string) {
 
 	router := gin.Default()
 	router.Use(authMw)
+	router.Use(gin.Logger())
+	router.Use(gin.Recovery())
 
 	alertGroup := router.Group("/alert")
 	{
