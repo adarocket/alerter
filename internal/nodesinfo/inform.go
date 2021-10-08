@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/adarocket/alerter/internal/cache"
-	"github.com/adarocket/alerter/internal/database"
+	"github.com/adarocket/alerter/internal/controller"
 	"github.com/adarocket/alerter/internal/nodesinfo/checker"
 	"github.com/adarocket/alerter/internal/nodesinfo/msgsender"
 	pb "github.com/adarocket/proto/proto-gen/notifier"
@@ -33,7 +33,8 @@ func CheckFieldsOfNode(newNode interface{}, key cache.KeyCache) (map[msgsender.K
 		return nil, err
 	}
 
-	alerts, err := database.NewAlertNodeInstance().GetCrossAlertNodeAndAlert(key.Key)
+	db := controller.GetControllerInstance().AlertNode
+	alerts, err := db.GetCrossAlertNodeAndAlert(key.Key)
 	if err != nil {
 		log.Println(err)
 		return nil, err
