@@ -1,6 +1,9 @@
 package database
 
-import "log"
+import (
+	"database/sql"
+	"log"
+)
 
 const createTableAlertNodeCardano = `
 	CREATE TABLE if not exists "alert_node" (
@@ -23,7 +26,7 @@ const createTableAlertsCardano = `
 	PRIMARY KEY("id"))
 `
 
-func CreateTables() error {
+func CreateTables(dbConn *sql.DB) error {
 	if _, err := dbConn.Exec(createTableAlertNodeCardano); err != nil {
 		log.Println("CreateNodeAuthTable", err)
 		return err

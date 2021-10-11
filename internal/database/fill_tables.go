@@ -1,6 +1,7 @@
 package database
 
 import (
+	"database/sql"
 	"log"
 )
 
@@ -20,7 +21,7 @@ const fillAlertsNodeTable = `
 	       (2, 0.0, 10.0, 10.0, 20.0, 'Max', '08e792fd-2a19-466f-9a2a-d9fd40bdf9d1')
 `
 
-func FillTables() error {
+func FillTables(dbConn *sql.DB) error {
 	_, err := dbConn.Exec(fillAlertsTable)
 	if err != nil {
 		log.Fatal(err)
