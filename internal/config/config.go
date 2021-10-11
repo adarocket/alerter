@@ -15,6 +15,7 @@ type Config struct {
 	SecretKey          string `json:"secret_key"`
 	AuthClientLogin    string `json:"auth_client_login"`
 	AuthClientPassword string `json:"auth_client_password"`
+	TimeoutCheck       int    `json:"timeout_check"`
 }
 
 const cConfigPath = "alerter.conf"

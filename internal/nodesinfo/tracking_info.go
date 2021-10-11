@@ -16,9 +16,7 @@ var informClient *client.ControllerClient
 var authClient *client.AuthClient
 var cardanoClient *client.CardanoClient
 
-const timeout = 5
-
-func StartTracking() {
+func StartTracking(timeoutCheck int) {
 	notifyClient, err := client.NewNotifierClient()
 	if err != nil {
 		log.Println(err)
@@ -35,11 +33,11 @@ func StartTracking() {
 			TypeMessage: "controller down", Value: err.Error()}); err != nil {
 			log.Println(err)
 		}
-		time.Sleep(time.Second * 5)
+		time.Sleep(time.Second * time.Duration(timeoutCheck))
 	}
 
 	cacheInstance := cache.GetCacheInstance()
-	for _ = range time.Tick(time.Second * timeout) {
+	for _ = range time.Tick(time.Second * time.Duration(timeoutCheck)) {
 		nodes, err := GetNodes()
 		if err != nil {
 			log.Println(err)
@@ -48,7 +46,6 @@ func StartTracking() {
 			if errSend != nil {
 				log.Println(errSend)
 			}
-			time.Sleep(time.Second * 5)
 			continue
 		}
 

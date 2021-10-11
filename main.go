@@ -27,7 +27,7 @@ func main() {
 
 	web.WebUI = webUI
 	go func() {
-		nodesinfo.StartTracking()
+		nodesinfo.StartTracking(conf.TimeoutCheck)
 	}()
 	web.StartServer(conf.WebServerAddr)
 }
