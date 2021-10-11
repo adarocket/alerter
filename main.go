@@ -2,6 +2,7 @@ package main
 
 import (
 	"embed"
+	"github.com/adarocket/alerter/internal/config"
 	"github.com/adarocket/alerter/internal/controller"
 	"github.com/adarocket/alerter/internal/database"
 	"github.com/adarocket/alerter/internal/nodesinfo"
@@ -14,8 +15,12 @@ var webUI embed.FS
 
 func main() {
 	log.SetFlags(log.Lshortfile)
+	conf, err := config.LoadConfig()
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	dbConn := database.InitDatabase("sqlDB.db")
+	dbConn := database.InitDatabase(conf.SqlLitePathDB)
 	controller.InitializeControllerInstances(dbConn)
 	//database.CreateTables()
 	//database.FillTables()
@@ -24,5 +29,5 @@ func main() {
 	go func() {
 		nodesinfo.StartTracking()
 	}()
-	web.StartServer(":8080")
+	web.StartServer(conf.WebServerAddr)
 }

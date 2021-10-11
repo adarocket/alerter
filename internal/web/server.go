@@ -2,7 +2,6 @@ package web
 
 import (
 	"embed"
-	_ "embed"
 	"fmt"
 	"github.com/adarocket/alerter/internal/controller"
 	"github.com/gin-gonic/gin"
