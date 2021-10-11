@@ -12,7 +12,7 @@ type ModelAlertNode interface {
 	CreateAlertNode(alertNode AlertNode) error
 	DeleteAlertNode(alertNodeID int64, nodeUuid string) error
 	UpdateAlertNode(table AlertNode) error
-	GetCrossAlertNodeAndAlert(nodeUuid string) ([]CrossAlertNodeAndAlert, error)
+	GetAlertsByNodeUuid(nodeUuid string) ([]CrossAlertNodeAndAlert, error)
 }
 
 type CrossAlertNodeAndAlert struct {
@@ -36,7 +36,7 @@ func NewAlertNodeInstance(dbConn *sql.DB) ModelAlertNode {
 	return &alertNodeDB{dbConn: dbConn}
 }
 
-const crossAlertNodeAndAlertQuery = `
+const getAlertsByNodeUuid = `
 	SELECT alert_id, normal_from, normal_to, critical_from, 
 	       critical_to, frequncy, node_uuid, name, checked_field, type_checker
 	FROM alert_node
@@ -44,8 +44,8 @@ const crossAlertNodeAndAlertQuery = `
 	AND  node_uuid = $2
 `
 
-func (p *alertNodeDB) GetCrossAlertNodeAndAlert(nodeUuid string) ([]CrossAlertNodeAndAlert, error) {
-	rows, err := p.dbConn.Query(crossAlertNodeAndAlertQuery, nodeUuid)
+func (p *alertNodeDB) GetAlertsByNodeUuid(nodeUuid string) ([]CrossAlertNodeAndAlert, error) {
+	rows, err := p.dbConn.Query(getAlertsByNodeUuid, nodeUuid)
 	if err != nil {
 		log.Println(err)
 		return []CrossAlertNodeAndAlert{}, err

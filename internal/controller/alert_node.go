@@ -19,8 +19,8 @@ func (c *AlertNode) GetAlertNodesByID(alertNodeID int64) ([]database.AlertNode, 
 	return objs, nil
 }
 
-func (c *AlertNode) GetCrossAlertNodeAndAlert(nodeUuid string) ([]database.CrossAlertNodeAndAlert, error) {
-	objs, err := c.db.GetCrossAlertNodeAndAlert(nodeUuid)
+func (c *AlertNode) GetAlertsByNodeUuid(nodeUuid string) ([]database.CrossAlertNodeAndAlert, error) {
+	objs, err := c.db.GetAlertsByNodeUuid(nodeUuid)
 	if err != nil {
 		log.Println(err)
 		return objs, err
