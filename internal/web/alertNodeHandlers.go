@@ -19,7 +19,7 @@ func GetAlertNodeHandlersInstance(cont controller.AlertNode) AlertNodeHandlers {
 }
 
 func (a *AlertNodeHandlers) getAlertNodesListByID(c *gin.Context) {
-	tmpl, err := template.ParseFS(WebUI, "data/getAlertNodes.html")
+	tmpl, err := template.ParseFS(WebUI, "tmpl/getAlertNodes.html")
 	if err != nil {
 		log.Println(err)
 		http.Error(c.Writer, "internal server error", http.StatusInternalServerError)
@@ -125,7 +125,7 @@ func (a *AlertNodeHandlers) GetAlertNodeByIDAndUuid(c *gin.Context) {
 		return
 	}
 
-	tmpl, err := template.ParseFS(WebUI, "data/getAlertNode.html")
+	tmpl, err := template.ParseFS(WebUI, "tmpl/getAlertNode.html")
 	if err != nil {
 		log.Println(err)
 		http.Error(c.Writer, "internal server error", http.StatusInternalServerError)
@@ -187,7 +187,7 @@ func (a *AlertNodeHandlers) updateAlertNode(c *gin.Context) {
 }
 
 func (a *AlertNodeHandlers) getEmptyAlertNodeTmpl(c *gin.Context) {
-	tmpl, err := template.ParseFS(WebUI, "data/getEmptyAlertNode.html")
+	tmpl, err := template.ParseFS(WebUI, "tmpl/getEmptyAlertNode.html")
 	if err != nil {
 		log.Println(err)
 		http.Error(c.Writer, "internal server error", http.StatusInternalServerError)

@@ -13,7 +13,7 @@ func getAuthHandler(c *gin.Context) {
 		return
 	}
 
-	tmpl, err := template.ParseFS(WebUI, "data/auth.html")
+	tmpl, err := template.ParseFS(WebUI, "tmpl/auth.html")
 	if err != nil {
 		log.Println(err)
 		http.Error(c.Writer, "internal server error", http.StatusInternalServerError)

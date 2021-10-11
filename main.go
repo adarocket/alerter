@@ -10,7 +10,7 @@ import (
 	"log"
 )
 
-//go:embed data/*.html
+//go:embed tmpl/*.html
 var webUI embed.FS
 
 func main() {
