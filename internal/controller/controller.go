@@ -5,18 +5,18 @@ import (
 	"github.com/adarocket/alerter/internal/database"
 )
 
-var AlertNodeController AlertNode
-var AlertController Alert
+var alertNodeController AlertNode
+var alertController Alert
 
 func InitializeControllerInstances(db *sql.DB) {
-	AlertController.db = database.NewAlertInstance(db)
-	AlertNodeController.db = database.NewAlertNodeInstance(db)
+	alertController.db = database.NewAlertInstance(db)
+	alertNodeController.db = database.NewAlertNodeInstance(db)
 }
 
 func GetAlertControllerInstance() Alert {
-	return AlertController
+	return alertController
 }
 
 func GetAlertNodeControllerInstance() AlertNode {
-	return AlertNodeController
+	return alertNodeController
 }
