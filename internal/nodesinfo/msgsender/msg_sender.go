@@ -29,36 +29,46 @@ func CreateMsgSender(notifyClient *client.NotifierClient) MsgSender {
 	}
 }
 
-func (s *MsgSender) updateNotifierInStack(notifier *notifier.SendNotifier, keyMsgSender KeyMsgSender) {
+func (s *MsgSender) updateNotifierInStack(notifier *notifier.SendNotifier, keyMsgSender KeyMsgSender) error {
 	if _, exist := s.stack[keyMsgSender]; exist && notifier.Frequency == Max.String() {
 		delete(s.stack, keyMsgSender)
-		s.notifyClient.SendMessage(notifier)
+		if err := s.notifyClient.SendMessage(notifier); err != nil {
+			log.Println(err)
+			return err
+		}
 	} else if notifier.Frequency == Max.String() {
 		s.notifyClient.SendMessage(notifier)
 	} else if exist {
 		val := s.stack[keyMsgSender]
 		if (val.tickSend - 1) <= 0 {
 			delete(s.stack, keyMsgSender)
-			s.notifyClient.SendMessage(notifier)
-		} else {
+			if err := s.notifyClient.SendMessage(notifier); err != nil {
+				log.Println(err)
+				return err
+			}
 			val.tickSend--
 			val.notify = notifier
 			s.stack[keyMsgSender] = val
 		}
 	} else {
 		valueMsgSender := ValueMsgSender{}
-		s.notifyClient.SendMessage(notifier)
+		if err := s.notifyClient.SendMessage(notifier); err != nil {
+			log.Println(err)
+			return err
+		}
 
 		tickDur, err := GetTickFrequency(notifier.GetFrequency())
 		if err != nil {
 			log.Println(err)
-			return
+			return err
 		}
 
 		valueMsgSender.tickSend = tickDur
 		valueMsgSender.notify = notifier
 		s.stack[keyMsgSender] = valueMsgSender
 	}
+
+	return nil
 }
 
 func (s *MsgSender) AddNotifiersToStack(messages map[KeyMsgSender]*notifier.SendNotifier) {
@@ -73,7 +83,9 @@ func (s *MsgSender) AddNotifiersToStack(messages map[KeyMsgSender]*notifier.Send
 		}
 	}
 
-	for key, notifier := range messages {
-		s.updateNotifierInStack(notifier, key)
+	for key, sendNotifier := range messages {
+		if err := s.updateNotifierInStack(sendNotifier, key); err != nil {
+			log.Println(err)
+		}
 	}
 }

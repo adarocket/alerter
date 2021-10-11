@@ -34,6 +34,7 @@ func CheckFieldsOfNode(newNode interface{}, key cache.KeyCache) (map[msgsender.K
 	}
 
 	db := controller.GetAlertNodeControllerInstance()
+	// вынести на уровень выше
 	alerts, err := db.GetAlertsByNodeUuid(key.Key)
 	if err != nil {
 		log.Println(err)
