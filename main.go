@@ -2,23 +2,27 @@ package main
 
 import (
 	"embed"
+	"github.com/adarocket/alerter/internal/controller"
+	"github.com/adarocket/alerter/internal/database"
+	"github.com/adarocket/alerter/internal/nodesinfo"
+	"github.com/adarocket/alerter/internal/web"
+	"log"
 )
 
 //go:embed data/*.html
 var webUI embed.FS
 
 func main() {
-	//in := controller.InitializeControllerInstance()
+	log.SetFlags(log.Lshortfile)
 
-	/*log.SetFlags(log.Lshortfile)
-
-	database.InitDatabase("sqlDB.db")
-	database.CreateTables()
+	dbConn := database.InitDatabase("sqlDB.db")
+	controller.InitializeControllerInstances(dbConn)
+	//database.CreateTables()
 	//database.FillTables()
 
 	web.WebUI = webUI
 	go func() {
 		nodesinfo.StartTracking()
 	}()
-	web.StartServer(":8080")*/
+	web.StartServer(":8080")
 }

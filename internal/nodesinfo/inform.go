@@ -33,8 +33,8 @@ func CheckFieldsOfNode(newNode interface{}, key cache.KeyCache) (map[msgsender.K
 		return nil, err
 	}
 
-	db := controller.GetControllerInstance().AlertNode
-	alerts, err := db.GetCrossAlertNodeAndAlert(key.Key)
+	db := controller.GetAlertNodeControllerInstance()
+	alerts, err := db.GetAlertsByNodeUuid(key.Key)
 	if err != nil {
 		log.Println(err)
 		return nil, err

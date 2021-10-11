@@ -12,10 +12,10 @@ type ModelAlertNode interface {
 	CreateAlertNode(alertNode AlertNode) error
 	DeleteAlertNode(alertNodeID int64, nodeUuid string) error
 	UpdateAlertNode(table AlertNode) error
-	GetAlertsByNodeUuid(nodeUuid string) ([]CrossAlertNodeAndAlert, error)
+	GetAlertsByNodeUuid(nodeUuid string) ([]AlertNodeAndAlert, error)
 }
 
-type CrossAlertNodeAndAlert struct {
+type AlertNodeAndAlert struct {
 	Name         string
 	CheckedField string
 	TypeChecker  string
@@ -44,23 +44,23 @@ const getAlertsByNodeUuid = `
 	AND  node_uuid = $2
 `
 
-func (p *alertNodeDB) GetAlertsByNodeUuid(nodeUuid string) ([]CrossAlertNodeAndAlert, error) {
+func (p *alertNodeDB) GetAlertsByNodeUuid(nodeUuid string) ([]AlertNodeAndAlert, error) {
 	rows, err := p.dbConn.Query(getAlertsByNodeUuid, nodeUuid)
 	if err != nil {
 		log.Println(err)
-		return []CrossAlertNodeAndAlert{}, err
+		return []AlertNodeAndAlert{}, err
 	}
 	defer rows.Close()
 
-	var nodes []CrossAlertNodeAndAlert
+	var nodes []AlertNodeAndAlert
 	for rows.Next() {
-		var node CrossAlertNodeAndAlert
+		var node AlertNodeAndAlert
 		err = rows.Scan(&node.AlertID, &node.NormalFrom, &node.NormalTo, &node.CriticalFrom,
 			&node.CriticalTo, &node.Frequency, &node.NodeUuid, &node.Name,
 			&node.CheckedField, &node.TypeChecker)
 		if err != nil {
 			log.Println(err)
-			return []CrossAlertNodeAndAlert{}, err
+			return []AlertNodeAndAlert{}, err
 		}
 
 		nodes = append(nodes, node)
