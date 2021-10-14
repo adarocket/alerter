@@ -33,7 +33,7 @@ func StartTracking(timeoutCheck int) {
 			break
 		}
 		if err := notifyClient.SendMessage(&notifier.SendNotifier{
-			TypeMessage: "controller down", Value: err.Error()}); err != nil {
+			TextMessage: "controller down"}); err != nil {
 			log.Println(err)
 		}
 		time.Sleep(time.Second * time.Duration(timeoutCheck))
@@ -97,7 +97,7 @@ func authMethods() map[string]bool {
 	}
 }
 
-func getNodesMessages() (map[msgsender.KeyMsgSender]*notifier.SendNotifier, error) {
+func getNodesMessages() (map[msgsender.KeyMsgSender]msgsender.ValueMsgSender, error) {
 	resp, err := informClient.GetNodeList()
 	if err != nil {
 		log.Println(err)
@@ -106,7 +106,7 @@ func getNodesMessages() (map[msgsender.KeyMsgSender]*notifier.SendNotifier, erro
 
 	cacheInstance := cache.GetCacheInstance()
 	cardanoNodes := make(map[cache.KeyCache]interface{})
-	nodesMessages := make(map[msgsender.KeyMsgSender]*notifier.SendNotifier)
+	nodesMessages := make(map[msgsender.KeyMsgSender]msgsender.ValueMsgSender)
 
 	for _, node := range resp.NodeAuthData {
 		switch node.Blockchain {
@@ -134,7 +134,8 @@ func getNodesMessages() (map[msgsender.KeyMsgSender]*notifier.SendNotifier, erro
 }
 
 func getCardanoNodeMessages(node *common.NodeAuthData) (
-	fieldNodeMessages map[msgsender.KeyMsgSender]*notifier.SendNotifier, resp *cardano.SaveStatisticRequest, err error) {
+	fieldNodeMessages map[msgsender.KeyMsgSender]msgsender.ValueMsgSender,
+	resp *cardano.SaveStatisticRequest, err error) {
 
 	resp, err = cardanoClient.GetStatistic(node.Uuid)
 	if err != nil {

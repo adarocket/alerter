@@ -17,14 +17,8 @@ const msgTemplateNormal = "current value: %s, normal value from %g to %g"
 const msgTemplateCritical = "current value: %s, critical value from %g to %g"
 const msgTemplateType = "Node %s, field %s"
 
-type MsgNodeField struct {
-	NodeUuid  string
-	NodeField string
-	*pb.SendNotifier
-}
-
 func CheckFieldsOfNode(newNode interface{}, key cache.KeyCache,
-	alerts []database.AlertNodeAndAlert) (map[msgsender.KeyMsgSender]*pb.SendNotifier, error) {
+	alerts []database.AlertNodeAndAlert) (map[msgsender.KeyMsgSender]msgsender.ValueMsgSender, error) {
 
 	cacheInstance := cache.GetCacheInstance()
 	oldNode := cacheInstance.GetOldNodeByType(newNode, key)
@@ -35,7 +29,7 @@ func CheckFieldsOfNode(newNode interface{}, key cache.KeyCache,
 		return nil, err
 	}
 
-	messages := map[msgsender.KeyMsgSender]*pb.SendNotifier{}
+	messages := map[msgsender.KeyMsgSender]msgsender.ValueMsgSender{}
 	for _, alert := range alerts {
 		value := gjson.Get(string(newNodeJSON), alert.CheckedField)
 		if !value.Exists() {
@@ -54,7 +48,9 @@ func CheckFieldsOfNode(newNode interface{}, key cache.KeyCache,
 			oldValue = oldVal.String()
 		}
 
-		msg := pb.SendNotifier{}
+		msg := msgsender.ValueMsgSender{
+			Notify: &pb.SendNotifier{},
+		}
 		var diffVal float64
 
 		switch alert.TypeChecker {
@@ -93,21 +89,23 @@ func CheckFieldsOfNode(newNode interface{}, key cache.KeyCache,
 
 		if diffVal > alert.CriticalTo || diffVal < alert.CriticalFrom {
 			msg.Frequency = msgsender.Normal.String()
-			msg.Value = fmt.Sprintf(msgTemplateCritical, value.String(), alert.NormalFrom, alert.NormalTo)
 		} else if diffVal > alert.NormalTo || diffVal < alert.NormalFrom {
-			msg.Value = fmt.Sprintf(msgTemplateNormal, value.String(), alert.NormalFrom, alert.NormalTo)
 			msg.Frequency = alert.Frequency
 		} else {
 			continue
 		}
 
-		msg.TypeMessage = fmt.Sprintf(msgTemplateType, key.Key, alert.CheckedField)
+		msg.Notify.From = fmt.Sprintf("%f", alert.CriticalFrom)
+		msg.Notify.To = fmt.Sprintf("%f", alert.CriticalTo)
+		msg.Notify.CurrentVal = value.String()
+		msg.Notify.TextMessage = fmt.Sprintf(msgTemplateType, key.Key, alert.CheckedField)
+
 		messagesKey := msgsender.KeyMsgSender{
 			NodeUuid:  key.Key,
 			NodeField: alert.CheckedField,
 		}
 
-		messages[messagesKey] = &msg
+		messages[messagesKey] = msg
 	}
 
 	return messages, nil
