@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/adarocket/alerter/internal/cache"
-	"github.com/adarocket/alerter/internal/controller"
+	"github.com/adarocket/alerter/internal/database"
 	"github.com/adarocket/alerter/internal/nodesinfo/checker"
 	"github.com/adarocket/alerter/internal/nodesinfo/msgsender"
 	pb "github.com/adarocket/proto/proto-gen/notifier"
@@ -23,19 +23,13 @@ type MsgNodeField struct {
 	*pb.SendNotifier
 }
 
-func CheckFieldsOfNode(newNode interface{}, key cache.KeyCache) (map[msgsender.KeyMsgSender]*pb.SendNotifier, error) {
+func CheckFieldsOfNode(newNode interface{}, key cache.KeyCache,
+	alerts []database.AlertNodeAndAlert) (map[msgsender.KeyMsgSender]*pb.SendNotifier, error) {
+
 	cacheInstance := cache.GetCacheInstance()
 	oldNode := cacheInstance.GetOldNodeByType(newNode, key)
 
 	newNodeJSON, err := json.Marshal(&newNode)
-	if err != nil {
-		log.Println(err)
-		return nil, err
-	}
-
-	db := controller.GetAlertNodeControllerInstance()
-	// вынести на уровень выше
-	alerts, err := db.GetAlertsByNodeUuid(key.Key)
 	if err != nil {
 		log.Println(err)
 		return nil, err

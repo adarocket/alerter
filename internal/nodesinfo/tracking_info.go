@@ -4,7 +4,9 @@ import (
 	"github.com/adarocket/alerter/internal/cache"
 	"github.com/adarocket/alerter/internal/client"
 	"github.com/adarocket/alerter/internal/config"
+	"github.com/adarocket/alerter/internal/controller"
 	"github.com/adarocket/alerter/internal/nodesinfo/msgsender"
+	"github.com/adarocket/proto/proto-gen/common"
 	"log"
 	"time"
 
@@ -36,29 +38,14 @@ func StartTracking(timeoutCheck int) {
 		time.Sleep(time.Second * time.Duration(timeoutCheck))
 	}
 
-	cacheInstance := cache.GetCacheInstance()
 	for _ = range time.Tick(time.Second * time.Duration(timeoutCheck)) {
-		nodes, err := GetNodes()
+		nodesMessages, err := getNodesMessages()
 		if err != nil {
 			log.Println(err)
-			errSend := notifyClient.SendMessage(&notifier.SendNotifier{
-				TypeMessage: "cant get nodes", Value: err.Error()})
-			if errSend != nil {
-				log.Println(errSend)
-			}
 			continue
 		}
 
-		var messages map[msgsender.KeyMsgSender]*notifier.SendNotifier
-		for key, node := range nodes {
-			messages, err = CheckFieldsOfNode(node, key)
-			if err != nil {
-				log.Println(err)
-			}
-		}
-
-		msgSender.AddNotifiersToStack(messages)
-		cacheInstance.AddNewInform(nodes)
+		msgSender.AddNotifiersToStack(nodesMessages)
 	}
 }
 
@@ -109,35 +96,75 @@ func authMethods() map[string]bool {
 	}
 }
 
-func GetNodes() (map[cache.KeyCache]interface{}, error) {
+func getNodesMessages() (map[msgsender.KeyMsgSender]*notifier.SendNotifier, error) {
 	resp, err := informClient.GetNodeList()
 	if err != nil {
 		log.Println(err)
 		return nil, err
 	}
 
-	cardanoNodes := make(map[cache.KeyCache]interface{}, 10)
+	cacheInstance := cache.GetCacheInstance()
+	cardanoNodes := make(map[cache.KeyCache]interface{})
+	nodesMessages := make(map[msgsender.KeyMsgSender]*notifier.SendNotifier)
 
 	for _, node := range resp.NodeAuthData {
 		switch node.Blockchain {
 		case "cardano":
-			resp, err := cardanoClient.GetStatistic(node.Uuid)
+			fieldNodeMessages, err := getCardanoNodeMessages(node)
 			if err != nil {
 				log.Println(err)
 				continue
 			}
 
-			if resp.NodeAuthData.Uuid == "" {
-				continue
+			for key, val := range fieldNodeMessages {
+				nodesMessages[key] = val
 			}
 
 			key := cache.KeyCache{
-				Key:      resp.NodeAuthData.Uuid,
+				Key:      node.Uuid,
 				TypeNode: node.Blockchain,
 			}
 			cardanoNodes[key] = resp
 		}
 	}
 
-	return cardanoNodes, nil
+	cacheInstance.AddNewInform(cardanoNodes)
+	return nodesMessages, nil
+}
+
+func getCardanoNodeMessages(node *common.NodeAuthData) (
+	fieldNodeMessages map[msgsender.KeyMsgSender]*notifier.SendNotifier, err error) {
+
+	resp, err := cardanoClient.GetStatistic(node.Uuid)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	if resp.NodeAuthData.Uuid == "" {
+		return
+	}
+
+	db := controller.GetAlertNodeControllerInstance()
+	alerts, err := db.GetAlertsByNodeUuid(resp.NodeAuthData.Uuid)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	if len(alerts) == 0 {
+		return
+	}
+
+	key := cache.KeyCache{
+		Key:      resp.NodeAuthData.Uuid,
+		TypeNode: node.Blockchain,
+	}
+	fieldNodeMessages, err = CheckFieldsOfNode(resp, key, alerts)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	return fieldNodeMessages, nil
 }
