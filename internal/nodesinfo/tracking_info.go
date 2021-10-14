@@ -19,8 +19,8 @@ var informClient *client.ControllerClient
 var authClient *client.AuthClient
 var cardanoClient *client.CardanoClient
 
-func StartTracking(timeoutCheck int) {
-	notifyClient, err := client.NewNotifierClient()
+func StartTracking(timeoutCheck int, notifyAddr string) {
+	notifyClient, err := client.NewNotifierClient(notifyAddr)
 	if err != nil {
 		log.Println(err)
 		return
