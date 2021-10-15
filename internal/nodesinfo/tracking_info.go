@@ -7,7 +7,6 @@ import (
 	"github.com/adarocket/alerter/internal/controller"
 	"github.com/adarocket/alerter/internal/nodesinfo/msgsender"
 	"github.com/adarocket/proto/proto-gen/cardano"
-	"github.com/adarocket/proto/proto-gen/common"
 	"log"
 	"time"
 
@@ -111,7 +110,12 @@ func getNodesMessages() (map[msgsender.KeyMsgSender]msgsender.ValueMsgSender, er
 	for _, node := range resp.NodeAuthData {
 		switch node.Blockchain {
 		case "cardano":
-			fieldNodeMessages, cardanoNode, err := getCardanoNodeMessages(node)
+			key := cache.KeyCache{
+				Key:      node.Uuid,
+				TypeNode: node.Blockchain,
+			}
+
+			fieldNodeMessages, cardanoNode, err := getCardanoNodeMessages(key)
 			if err != nil {
 				log.Println(err)
 				continue
@@ -121,10 +125,6 @@ func getNodesMessages() (map[msgsender.KeyMsgSender]msgsender.ValueMsgSender, er
 				nodesMessages[key] = val
 			}
 
-			key := cache.KeyCache{
-				Key:      node.Uuid,
-				TypeNode: node.Blockchain,
-			}
 			cardanoNodes[key] = cardanoNode
 		}
 	}
@@ -133,11 +133,11 @@ func getNodesMessages() (map[msgsender.KeyMsgSender]msgsender.ValueMsgSender, er
 	return nodesMessages, nil
 }
 
-func getCardanoNodeMessages(node *common.NodeAuthData) (
+func getCardanoNodeMessages(key cache.KeyCache) (
 	fieldNodeMessages map[msgsender.KeyMsgSender]msgsender.ValueMsgSender,
 	resp *cardano.SaveStatisticRequest, err error) {
 
-	resp, err = cardanoClient.GetStatistic(node.Uuid)
+	resp, err = cardanoClient.GetStatistic(key.Key)
 	if err != nil {
 		log.Println(err)
 		return
@@ -158,10 +158,6 @@ func getCardanoNodeMessages(node *common.NodeAuthData) (
 		return
 	}
 
-	key := cache.KeyCache{
-		Key:      resp.NodeAuthData.Uuid,
-		TypeNode: node.Blockchain,
-	}
 	fieldNodeMessages, err = CheckFieldsOfNode(resp, key, alerts)
 	if err != nil {
 		log.Println(err)
