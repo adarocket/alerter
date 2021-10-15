@@ -13,8 +13,6 @@ import (
 	"time"
 )
 
-const msgTemplateNormal = "current value: %s, normal value from %g to %g"
-const msgTemplateCritical = "current value: %s, critical value from %g to %g"
 const msgTemplateType = "Node %s, field %s"
 
 func CheckFieldsOfNode(newNode interface{}, key cache.KeyCache,
@@ -55,8 +53,8 @@ func CheckFieldsOfNode(newNode interface{}, key cache.KeyCache,
 
 		switch alert.TypeChecker {
 		case checker.IntervalT.String():
-			diffVal, err = checker.Checker(alert.NormalFrom,
-				alert.NormalTo, value.String(), alert.TypeChecker)
+			diffVal, err = checker.IntervalTest(alert.NormalFrom,
+				alert.NormalTo, value.String())
 			if err != nil {
 				log.Println(err)
 				continue
@@ -65,7 +63,7 @@ func CheckFieldsOfNode(newNode interface{}, key cache.KeyCache,
 			if oldNode == nil {
 				continue
 			}
-			diffVal, err = checker.Checker(oldValue, value.String(), nil, alert.TypeChecker)
+			diffVal, err = checker.ChangeUpTest(oldValue, value.String())
 			if err != nil {
 				log.Println(err)
 				continue
@@ -77,7 +75,7 @@ func CheckFieldsOfNode(newNode interface{}, key cache.KeyCache,
 				log.Println(err)
 				continue
 			}
-			diffVal, err = checker.Checker(tm, nil, nil, alert.TypeChecker)
+			diffVal, err = checker.DateCheckTest(tm)
 			if err != nil {
 				log.Println(err)
 				continue

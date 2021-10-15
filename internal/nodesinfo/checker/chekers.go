@@ -2,83 +2,121 @@ package checker
 
 import (
 	"errors"
+	"log"
 	"math"
 	"strconv"
 	"time"
 )
 
-// Interval returns -val if val < a1 and +val if val > a2, return 0 if ok
-func Interval(bottomLine, topLine, val float64) float64 {
-	if val > topLine {
-		return math.Abs(val) - math.Abs(topLine)
+func IntervalTest(bottomLine, topLine, val interface{}) (float64, error) {
+	if bottomLine == nil || topLine == nil || val == nil {
+		return 0, errors.New("on of the args is nil")
 	}
 
-	if val < bottomLine {
-		return math.Abs(bottomLine) - math.Abs(val)
+	_, _, valF, err := parseToFloat64(nil, nil, val)
+	if err != nil {
+		log.Println(err)
+		return 0, err
 	}
 
-	return val
+	return valF, nil
 }
 
-func ChangeUp(oldVal, newVal float64) float64 {
-	return newVal - oldVal
-}
-
-func ChangeDown(oldVal, newVal float64) float64 {
-	return oldVal - newVal
-}
-
-func DateCheck(dat time.Time) float64 {
-	return float64(dat.Unix() - time.Now().Unix())
-}
-
-func Checker(a1, a2, a3 interface{}, checkerType string) (float64, error) {
-	var a1float64 float64
-	var a2float64 float64
-	var a3float64 float64
-
-	if a1 != nil {
-		if a1Str, isTrt := a1.(string); isTrt {
-			a1float64, _ = strconv.ParseFloat(a1Str, 64)
-		}
-		if a1Float, isTrt := a1.(float64); isTrt {
-			a1float64 = a1Float
-		}
-	}
-	if a2 != nil {
-		if a1Str, isTrt := a2.(string); isTrt {
-			a2float64, _ = strconv.ParseFloat(a1Str, 64)
-		}
-		if a1Float, isTrt := a2.(float64); isTrt {
-			a2float64 = a1Float
-		}
-	}
-	if a3 != nil {
-		if a1Str, isTrt := a3.(string); isTrt {
-			a3float64, _ = strconv.ParseFloat(a1Str, 64)
-		}
-		if a1Float, isTrt := a3.(float64); isTrt {
-			a3float64 = a1Float
-		}
+func ChangeUpTest(oldVal, newVal interface{}) (float64, error) {
+	if oldVal == nil || newVal == nil {
+		return 0, errors.New("on of the args is nil")
 	}
 
-	switch checkerType {
-	case IntervalT.String():
-		return Interval(a1float64, a2float64, a3float64), nil
-	case ChangeUpT.String():
-		return ChangeUp(a1float64, a2float64), nil
-	case ChangeDownT.String():
-		return ChangeDown(a1float64, a2float64), nil
-	case DateT.String():
-		var dat time.Time
-		if a, isTr := a1.(time.Time); isTr {
-			dat = a
+	oldValF, newValF, _, err := parseToFloat64(oldVal, newVal, nil)
+	if err != nil {
+		log.Println(err)
+		return 0, err
+	}
+
+	if newValF-oldValF < 0 {
+		return 0, nil
+	} else {
+		return newValF - oldValF, nil
+	}
+}
+
+func ChangeDownTest(oldVal, newVal interface{}) (float64, error) {
+	if oldVal == nil || newVal == nil {
+		return 0, errors.New("on of the args is nil")
+	}
+
+	oldValF, newValF, _, err := parseToFloat64(oldVal, newVal, nil)
+	if err != nil {
+		log.Println(err)
+		return 0, err
+	}
+
+	if newValF-oldValF > 0 {
+		return 0, nil
+	} else {
+		return newValF - oldValF, nil
+	}
+}
+
+func DateCheckTest(val interface{}) (float64, error) {
+	if val == nil {
+		return 0, errors.New("on of the args is nil")
+	}
+
+	var dat time.Time
+	if a, isTr := val.(time.Time); isTr {
+		dat = a
+	} else {
+		return 0, errors.New("invalid date type")
+	}
+
+	return float64(dat.Unix() - time.Now().Unix()), nil
+}
+
+func EqualCheckTest(currVal, equalVal interface{}) (float64, error) {
+	if currVal == nil || equalVal == nil {
+		return 0, errors.New("on of the args is nil")
+	}
+
+	currValF, equalValF, _, err := parseToFloat64(currVal, equalVal, nil)
+	if err != nil {
+		log.Println(err)
+		return 0, err
+	}
+
+	return math.Abs(currValF - equalValF), nil
+}
+
+func parseToFloat64(val1, val2, val3 interface{}) (val1F float64,
+	val2F float64, val3F float64, err error) {
+
+	if val1 != nil {
+		if str, ok := val1.(string); ok {
+			val1F, _ = strconv.ParseFloat(str, 64)
+		} else if val1F, ok = val1.(float64); ok {
 		} else {
-			return 0, errors.New("invalid date type")
+			err = errors.New("invalid type")
+			return
 		}
-
-		return DateCheck(dat), nil
-	default:
-		return 0, errors.New("checker type not support")
 	}
+	if val2 != nil {
+		if str, ok := val2.(string); ok {
+			val2F, _ = strconv.ParseFloat(str, 64)
+		} else if val2F, ok = val2.(float64); ok {
+		} else {
+			err = errors.New("invalid type")
+			return
+		}
+	}
+	if val3 != nil {
+		if str, ok := val3.(string); ok {
+			val3F, _ = strconv.ParseFloat(str, 64)
+		} else if val3F, ok = val3.(float64); ok {
+		} else {
+			err = errors.New("invalid type")
+			return
+		}
+	}
+
+	return
 }
