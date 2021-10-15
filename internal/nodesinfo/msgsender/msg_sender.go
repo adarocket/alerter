@@ -8,7 +8,7 @@ import (
 
 type MsgSender struct {
 	notifyClient *client.NotifierClient
-	stack        map[KeyMsgSender]ValueMsgSender
+	stack        map[KeyMsgSender]int64
 }
 
 type KeyMsgSender struct {
@@ -23,7 +23,7 @@ type ValueMsgSender struct {
 }
 
 func CreateMsgSender(notifyClient *client.NotifierClient) MsgSender {
-	newMap := make(map[KeyMsgSender]ValueMsgSender)
+	newMap := make(map[KeyMsgSender]int64)
 	return MsgSender{
 		notifyClient: notifyClient,
 		stack:        newMap,
@@ -41,18 +41,23 @@ func (s *MsgSender) updateNotifierInStack(notifier ValueMsgSender, keyMsgSender 
 		s.notifyClient.SendMessage(notifier.Notify)
 	} else if exist {
 		val := s.stack[keyMsgSender]
-		if (val.tickSend - 1) <= 0 {
-			delete(s.stack, keyMsgSender)
+		if (val - 1) <= 0 {
 			if err := s.notifyClient.SendMessage(notifier.Notify); err != nil {
 				log.Println(err)
 				return err
 			}
-			val.tickSend--
-			val.Notify = notifier.Notify
-			s.stack[keyMsgSender] = val
+
+			tickDur, err := GetTickFrequency(notifier.Frequency)
+			if err != nil {
+				log.Println(err)
+				return err
+			}
+			s.stack[keyMsgSender] = tickDur
+
+			return nil
 		}
+		s.stack[keyMsgSender] = val - 1
 	} else {
-		valueMsgSender := ValueMsgSender{}
 		if err := s.notifyClient.SendMessage(notifier.Notify); err != nil {
 			log.Println(err)
 			return err
@@ -63,10 +68,7 @@ func (s *MsgSender) updateNotifierInStack(notifier ValueMsgSender, keyMsgSender 
 			log.Println(err)
 			return err
 		}
-
-		valueMsgSender.tickSend = tickDur
-		valueMsgSender.Notify = notifier.Notify
-		s.stack[keyMsgSender] = valueMsgSender
+		s.stack[keyMsgSender] = tickDur
 	}
 
 	return nil
