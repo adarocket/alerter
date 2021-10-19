@@ -22,7 +22,7 @@ func authMw(c *gin.Context) {
 		c.Abort()
 	} else {
 		if isValid := IsValidToken(cookies[0].Value); !isValid {
-			getAuthHandler(c)
+			c.Redirect(http.StatusFound, c.Request.URL.Host+"/auth")
 			c.Abort()
 		}
 	}
@@ -55,6 +55,8 @@ func StartServer(webServerAddr string) {
 	}
 
 	router.GET("/alertNodes/:id", alertNodeController.getAlertNodesListByID)
+	router.GET("/auth", getAuthHandler)
+	router.POST("/auth", postAuthHandler)
 	router.GET(homePage, alertHandlers.getAlertsList)
 	http.Handle("/", router)
 
