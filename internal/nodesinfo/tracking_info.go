@@ -104,7 +104,7 @@ func getNodesMessages() (map[msgsender.KeyMsgSender]msgsender.ValueMsgSender, er
 	}
 
 	cacheInstance := cache.GetCacheInstance()
-	cardanoNodes := make(map[cache.KeyCache]interface{})
+	cardanoNodes := make(map[cache.KeyCache]*cardano.SaveStatisticRequest)
 	nodesMessages := make(map[msgsender.KeyMsgSender]msgsender.ValueMsgSender)
 
 	for _, node := range resp.NodeAuthData {

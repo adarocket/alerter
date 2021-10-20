@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-const msgTemplateType = "Node %s, field %s"
+const msgTemplateType = "Node %s, field %s, cheker type: %s"
 
 func CheckFieldsOfNode(newNode interface{}, key cache.KeyCache,
 	alerts []database.AlertNodeAndAlert) (map[msgsender.KeyMsgSender]msgsender.ValueMsgSender, error) {
@@ -35,7 +35,7 @@ func CheckFieldsOfNode(newNode interface{}, key cache.KeyCache,
 			continue
 		}
 
-		var oldValue interface{}
+		var oldValue string
 		if oldNode != nil {
 			oldNodeJSON, _ := json.Marshal(&oldNode)
 			oldVal := gjson.Get(string(oldNodeJSON), alert.CheckedField)
@@ -60,7 +60,7 @@ func CheckFieldsOfNode(newNode interface{}, key cache.KeyCache,
 				continue
 			}
 		case checker.ChangeUpT.String():
-			if oldNode == nil {
+			if oldValue == "" {
 				continue
 			}
 			diffVal, err = checker.ChangeUpTest(oldValue, value.String())
@@ -81,7 +81,7 @@ func CheckFieldsOfNode(newNode interface{}, key cache.KeyCache,
 				continue
 			}
 		case checker.EqualT.String():
-			if oldNode == nil {
+			if oldValue == "" {
 				continue
 			}
 			diffVal, err = checker.EqualCheckTest(value.String(), oldValue)
@@ -113,7 +113,7 @@ func CheckFieldsOfNode(newNode interface{}, key cache.KeyCache,
 		}
 
 		msg.Notify.CurrentVal = value.String()
-		msg.Notify.TextMessage = fmt.Sprintf(msgTemplateType, key.Key, alert.CheckedField)
+		msg.Notify.TextMessage = fmt.Sprintf(msgTemplateType, key.Key, alert.CheckedField, alert.TypeChecker)
 
 		messagesKey := msgsender.KeyMsgSender{
 			NodeUuid:  key.Key,

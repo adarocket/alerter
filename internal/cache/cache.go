@@ -18,6 +18,7 @@ var (
 func GetCacheInstance() Cache {
 	once.Do(func() {
 		instance = Cache{}
+		instance.CardanoNodes = make(map[KeyCache]*cardano.SaveStatisticRequest)
 	})
 
 	return instance
