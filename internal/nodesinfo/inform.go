@@ -80,21 +80,38 @@ func CheckFieldsOfNode(newNode interface{}, key cache.KeyCache,
 				log.Println(err)
 				continue
 			}
+		case checker.EqualT.String():
+			if oldNode == nil {
+				continue
+			}
+			diffVal, err = checker.EqualCheckTest(value.String(), oldValue)
+			if err != nil {
+				log.Println(err)
+				continue
+			}
+		case checker.MoreT.String():
+			diffVal, _, _, err = checker.ParseToFloat64(value.String(), nil, nil)
+			if err != nil {
+				log.Println(err)
+				continue
+			}
 		default:
 			log.Println("undefined checker type")
 			continue
 		}
 
 		if diffVal > alert.CriticalTo || diffVal < alert.CriticalFrom {
-			msg.Frequency = msgsender.Normal.String()
+			msg.Frequency = msgsender.Max.String()
+			msg.Notify.From = fmt.Sprintf("%f", alert.CriticalFrom)
+			msg.Notify.To = fmt.Sprintf("%f", alert.CriticalTo)
 		} else if diffVal > alert.NormalTo || diffVal < alert.NormalFrom {
 			msg.Frequency = alert.Frequency
+			msg.Notify.From = fmt.Sprintf("%f", alert.NormalFrom)
+			msg.Notify.To = fmt.Sprintf("%f", alert.NormalTo)
 		} else {
 			continue
 		}
 
-		msg.Notify.From = fmt.Sprintf("%f", alert.CriticalFrom)
-		msg.Notify.To = fmt.Sprintf("%f", alert.CriticalTo)
 		msg.Notify.CurrentVal = value.String()
 		msg.Notify.TextMessage = fmt.Sprintf(msgTemplateType, key.Key, alert.CheckedField)
 
