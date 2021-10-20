@@ -9,6 +9,7 @@ import (
 	"time"
 )
 
+// NotifierClient is a client to send notifiers service RPCs
 type NotifierClient struct {
 	client pb.NotifierConnectClient
 }
@@ -30,6 +31,7 @@ func NewNotifierClient(addr string) (*NotifierClient, error) {
 	return &NotifierClient{client}, nil
 }
 
+// SendMessage - send notifier to notifierServer
 func (c *NotifierClient) SendMessage(msg *pb.SendNotifier) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -39,22 +41,6 @@ func (c *NotifierClient) SendMessage(msg *pb.SendNotifier) error {
 		grpclog.Errorf("fail to dial: %v", err)
 		log.Println(err)
 		return err
-	}
-
-	return nil
-}
-
-func (c *NotifierClient) SendMessages(msges []*pb.SendNotifier) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	for _, msg := range msges {
-		_, err := c.client.SendNotification(ctx, msg)
-		if err != nil {
-			grpclog.Errorf("fail to dial: %v", err)
-			log.Println(err)
-			continue
-		}
 	}
 
 	return nil

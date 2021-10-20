@@ -15,6 +15,7 @@ var (
 	instance Cache
 )
 
+// GetCacheInstance - возвращает или создает объект кэша, проинициализировав перед этим карты
 func GetCacheInstance() Cache {
 	once.Do(func() {
 		instance = Cache{}
@@ -34,6 +35,8 @@ type Cache struct {
 	ChiaNodes    map[KeyCache]*chia.SaveStatisticRequest
 }
 
+// AddNewInform - аргументом является карта, функции проверяет наличие такого типа и
+// если он есть делает пересечение карт
 func (c *Cache) AddNewInform(newMap interface{}) {
 	if newMapCardano, isTr := newMap.(map[KeyCache]*cardano.SaveStatisticRequest); isTr {
 		for key, node := range newMapCardano {

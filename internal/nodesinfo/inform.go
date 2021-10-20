@@ -15,6 +15,7 @@ import (
 
 const msgTemplateType = "Node %s, field %s, cheker type: %s"
 
+// CheckFieldsOfNode - checking fields of node and create notifiers messages
 func CheckFieldsOfNode(newNode interface{}, key cache.KeyCache,
 	alerts []database.AlertNodeAndAlert) (map[msgsender.KeyMsgSender]msgsender.ValueMsgSender, error) {
 

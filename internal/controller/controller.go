@@ -8,6 +8,7 @@ import (
 var alertNodeController AlertNode
 var alertController Alert
 
+// InitializeControllerInstances - init alert and alertNode instances
 func InitializeControllerInstances(db *sql.DB) {
 	alertController.db = database.NewAlertInstance(db)
 	alertNodeController.db = database.NewAlertNodeInstance(db)

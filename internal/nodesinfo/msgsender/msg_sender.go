@@ -74,6 +74,7 @@ func (s *MsgSender) updateNotifierInStack(notifier ValueMsgSender, keyMsgSender 
 	return nil
 }
 
+// AddNotifiersToStack - add new notifiers to stack or delete old notifier if new map doest have old one
 func (s *MsgSender) AddNotifiersToStack(messages map[KeyMsgSender]ValueMsgSender) {
 	for key, _ := range s.stack {
 		if _, exist := messages[key]; !exist {

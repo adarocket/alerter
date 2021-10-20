@@ -13,6 +13,7 @@ const (
 	//secretKey       = "secretKey"
 )
 
+// GenerateToken - with time claims
 func GenerateToken() (string, error) {
 	loadConfig, err := config.LoadConfig()
 	if err != nil {

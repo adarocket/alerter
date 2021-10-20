@@ -7,12 +7,10 @@ import (
 	"time"
 )
 
-// InformClient is a client to call laptop service RPCs
 type ChiaClient struct {
 	service pb.ChiaClient
 }
 
-// NewInformClient -
 func NewChiaClient(cc *grpc.ClientConn) *ChiaClient {
 	service := pb.NewChiaClient(cc)
 	return &ChiaClient{service}

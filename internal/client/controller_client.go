@@ -9,7 +9,7 @@ import (
 	"google.golang.org/grpc"
 )
 
-// InformClient is a client to call laptop service RPCs
+// ControllerClient is a client to call laptop service RPCs
 type ControllerClient struct {
 	service pbCommon.ControllerClient
 }
@@ -20,7 +20,7 @@ func NewControllerClient(cc *grpc.ClientConn) *ControllerClient {
 	return &ControllerClient{service}
 }
 
-// GetStatistic -
+// GetNodeList - returns list of all nodes
 func (informClient *ControllerClient) GetNodeList() (resp *pbCommon.GetNodeListResponse, err error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()

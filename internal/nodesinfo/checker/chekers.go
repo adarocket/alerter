@@ -22,6 +22,7 @@ func IntervalTest(bottomLine, topLine, val interface{}) (float64, error) {
 	return valF, nil
 }
 
+// ChangeUpTest - returns 0 if newVal - oldVal < 0, in other cases diff
 func ChangeUpTest(oldVal, newVal interface{}) (float64, error) {
 	if oldVal == nil || newVal == nil {
 		return 0, errors.New("on of the args is nil")
@@ -58,6 +59,7 @@ func ChangeDownTest(oldVal, newVal interface{}) (float64, error) {
 	}
 }
 
+// DateCheckTest - returns (val - current data) in unix format
 func DateCheckTest(val interface{}) (float64, error) {
 	if val == nil {
 		return 0, errors.New("on of the args is nil")
@@ -73,6 +75,7 @@ func DateCheckTest(val interface{}) (float64, error) {
 	return float64(dat.Unix() - time.Now().Unix()), nil
 }
 
+// EqualCheckTest - returns abs(currValF - equalValF)
 func EqualCheckTest(currVal, equalVal interface{}) (float64, error) {
 	if currVal == nil || equalVal == nil {
 		return 0, errors.New("on of the args is nil")
