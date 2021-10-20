@@ -13,7 +13,7 @@ func IntervalTest(bottomLine, topLine, val interface{}) (float64, error) {
 		return 0, errors.New("on of the args is nil")
 	}
 
-	_, _, valF, err := parseToFloat64(nil, nil, val)
+	_, _, valF, err := ParseToFloat64(nil, nil, val)
 	if err != nil {
 		log.Println(err)
 		return 0, err
@@ -27,7 +27,7 @@ func ChangeUpTest(oldVal, newVal interface{}) (float64, error) {
 		return 0, errors.New("on of the args is nil")
 	}
 
-	oldValF, newValF, _, err := parseToFloat64(oldVal, newVal, nil)
+	oldValF, newValF, _, err := ParseToFloat64(oldVal, newVal, nil)
 	if err != nil {
 		log.Println(err)
 		return 0, err
@@ -45,7 +45,7 @@ func ChangeDownTest(oldVal, newVal interface{}) (float64, error) {
 		return 0, errors.New("on of the args is nil")
 	}
 
-	oldValF, newValF, _, err := parseToFloat64(oldVal, newVal, nil)
+	oldValF, newValF, _, err := ParseToFloat64(oldVal, newVal, nil)
 	if err != nil {
 		log.Println(err)
 		return 0, err
@@ -78,7 +78,7 @@ func EqualCheckTest(currVal, equalVal interface{}) (float64, error) {
 		return 0, errors.New("on of the args is nil")
 	}
 
-	currValF, equalValF, _, err := parseToFloat64(currVal, equalVal, nil)
+	currValF, equalValF, _, err := ParseToFloat64(currVal, equalVal, nil)
 	if err != nil {
 		log.Println(err)
 		return 0, err
@@ -87,7 +87,7 @@ func EqualCheckTest(currVal, equalVal interface{}) (float64, error) {
 	return math.Abs(currValF - equalValF), nil
 }
 
-func parseToFloat64(val1, val2, val3 interface{}) (val1F float64,
+func ParseToFloat64(val1, val2, val3 interface{}) (val1F float64,
 	val2F float64, val3F float64, err error) {
 
 	if val1 != nil {
