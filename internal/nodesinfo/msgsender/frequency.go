@@ -19,8 +19,8 @@ var frequencyTypes = [...]string{
 }
 
 var tickSend = [...]int64{
-	20,
-	10,
+	8,
+	4,
 	1,
 }
 
