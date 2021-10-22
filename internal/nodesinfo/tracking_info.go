@@ -7,10 +7,10 @@ import (
 	"github.com/adarocket/alerter/internal/controller"
 	"github.com/adarocket/alerter/internal/nodesinfo/msgsender"
 	"github.com/adarocket/proto/proto-gen/cardano"
+	"github.com/adarocket/proto/proto-gen/notifier"
 	"log"
 	"time"
 
-	"github.com/adarocket/proto/proto-gen/notifier"
 	"google.golang.org/grpc"
 )
 
@@ -27,18 +27,15 @@ func StartTracking(timeoutCheck int, notifyAddr string) {
 
 	msgSender := msgsender.CreateMsgSender(notifyClient)
 
-	for {
-		if err := auth(); err == nil {
-			break
-		}
-		if err := notifyClient.SendMessage(&notifier.SendNotifier{
-			TextMessage: "controller down"}); err != nil {
-			log.Println(err)
-		}
-		time.Sleep(time.Second * time.Duration(timeoutCheck))
-	}
-
 	for _ = range time.Tick(time.Second * time.Duration(timeoutCheck)) {
+		if err := auth(); err != nil {
+			if err := notifyClient.SendMessage(&notifier.SendNotifier{
+				TextMessage: "controller down"}); err != nil {
+				log.Println(err)
+			}
+			continue
+		}
+
 		nodesMessages, err := getNodesMessages()
 		if err != nil {
 			log.Println(err)
