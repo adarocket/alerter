@@ -2,15 +2,12 @@ package cache
 
 import (
 	"errors"
-	"log"
-	"sync"
-
 	"github.com/adarocket/proto/proto-gen/cardano"
 	"github.com/adarocket/proto/proto-gen/chia"
+	"log"
 )
 
 var (
-	once     sync.Once
 	instance Cache
 )
 
@@ -19,13 +16,12 @@ type Cache struct {
 	ChiaNodes    map[string]*chia.SaveStatisticRequest
 }
 
+func init() {
+	instance = Cache{}
+	instance.CardanoNodes = make(map[string]*cardano.SaveStatisticRequest)
+}
+
 func GetCacheInstance() Cache {
-	once.Do(func() {
-		instance = Cache{}
-		instance.CardanoNodes = make(map[string]*cardano.SaveStatisticRequest)
-
-	})
-
 	return instance
 }
 
