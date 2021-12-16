@@ -53,9 +53,11 @@ func CheckFieldsOfNode(newNode interface{}, oldNode interface{},
 			continue
 		}
 
-		msg, err := createMsg(alert, diffVal, value)
+		msg, valid, err := createMsgIfDiffNotValid(alert, diffVal, value.String())
 		if err != nil {
 			log.Println(err)
+			continue
+		} else if valid {
 			continue
 		}
 
@@ -101,7 +103,7 @@ func calculateDiffVal(alert model.AlertNodeAndAlert, oldValue string, value stri
 
 	switch alert.TypeChecker {
 	case checker.IntervalT.String():
-		diffVal, err = checker.IntervalTest(alert.NormalFrom,
+		diffVal, err = checker.IntervalCalculate(alert.NormalFrom,
 			alert.NormalTo, value)
 		if err != nil {
 			log.Println(err)
@@ -111,7 +113,7 @@ func calculateDiffVal(alert model.AlertNodeAndAlert, oldValue string, value stri
 		if oldValue == "" {
 			return 0, errors.New("old val does not exist")
 		}
-		diffVal, err = checker.ChangeUpTest(oldValue, value)
+		diffVal, err = checker.ChangeUpCalculate(oldValue, value)
 		if err != nil {
 			log.Println(err)
 			return 0, err
@@ -123,7 +125,7 @@ func calculateDiffVal(alert model.AlertNodeAndAlert, oldValue string, value stri
 			log.Println(err)
 			return 0, err
 		}
-		diffVal, err = checker.DateCheckTest(tm)
+		diffVal, err = checker.DateDiffCalculate(tm)
 		if err != nil {
 			log.Println(err)
 			return 0, err
@@ -132,7 +134,7 @@ func calculateDiffVal(alert model.AlertNodeAndAlert, oldValue string, value stri
 		if oldValue == "" {
 			return 0, errors.New("old val does not exist")
 		}
-		diffVal, err = checker.EqualCheckTest(value, oldValue)
+		diffVal, err = checker.EqualCheck(value, oldValue)
 		if err != nil {
 			log.Println(err)
 			return 0, err
@@ -151,9 +153,9 @@ func calculateDiffVal(alert model.AlertNodeAndAlert, oldValue string, value stri
 	return diffVal, nil
 }
 
-func createMsg(alert model.AlertNodeAndAlert,
-	diffVal float64, value gjson.Result) (msgsender.BodyMsg, error) {
-	msg := msgsender.BodyMsg{
+func createMsgIfDiffNotValid(alert model.AlertNodeAndAlert,
+	diffVal float64, value string) (msg msgsender.BodyMsg, valid bool, err error) {
+	msg = msgsender.BodyMsg{
 		Notify: &pb.SendNotifier{},
 	}
 
@@ -165,18 +167,17 @@ func createMsg(alert model.AlertNodeAndAlert,
 		frequency, err := calculateFrequency(diffVal, alert.Frequency)
 		if err != nil {
 			log.Println(err)
-			return msgsender.BodyMsg{}, err
+			return
 		}
 		msg.Frequency = int64(frequency)
 		msg.Notify.From = fmt.Sprintf("%f", alert.NormalFrom)
 		msg.Notify.To = fmt.Sprintf("%f", alert.NormalTo)
 	} else {
-		return msgsender.BodyMsg{},
-			errors.New("something goes wrong while creating notify") // not error!!!
+		return msgsender.BodyMsg{}, true, nil
 	}
 
-	msg.Notify.CurrentVal = value.String()
+	msg.Notify.CurrentVal = value
 	msg.Notify.TextMessage = fmt.Sprintf(msgTemplateType, alert.NodeUuid, alert.CheckedField, alert.TypeChecker)
 
-	return msg, nil
+	return msg, false, nil
 }

@@ -9,7 +9,7 @@ import (
 )
 
 // rebuild it
-func IntervalTest(bottomLine, topLine float64, val string) (float64, error) {
+func IntervalCalculate(bottomLine, topLine float64, val string) (float64, error) {
 	if val == "" {
 		return 0, errors.New("on of the args is nil")
 	}
@@ -24,8 +24,8 @@ func IntervalTest(bottomLine, topLine float64, val string) (float64, error) {
 	return valF, nil
 }
 
-// ChangeUpTest - returns 0 if newVal - oldVal < 0, in other cases diff
-func ChangeUpTest(oldVal, newVal string) (float64, error) {
+// ChangeUpCalculate - returns 0 if newVal - oldVal < 0, in other cases diff
+func ChangeUpCalculate(oldVal, newVal string) (float64, error) {
 	if oldVal == "" || newVal == "" {
 		return 0, errors.New("on of the args is nil")
 	}
@@ -48,7 +48,7 @@ func ChangeUpTest(oldVal, newVal string) (float64, error) {
 	}
 }
 
-func ChangeDownTest(oldVal, newVal string) (float64, error) {
+func ChangeDownCalculate(oldVal, newVal string) (float64, error) {
 	if oldVal == "" || newVal == "" {
 		return 0, errors.New("on of the args is nil")
 	}
@@ -71,13 +71,13 @@ func ChangeDownTest(oldVal, newVal string) (float64, error) {
 	}
 }
 
-// DateCheckTest - returns (val - current data) in days
-func DateCheckTest(val time.Time) (float64, error) {
+// DateDiffCalculate - returns (val - current data) in days
+func DateDiffCalculate(val time.Time) (float64, error) {
 	return val.Sub(time.Now()).Hours(), nil
 }
 
-// EqualCheckTest - returns abs(currValF - equalValF)
-func EqualCheckTest(currVal, equalVal string) (float64, error) {
+// EqualCheck - returns abs(currValF - equalValF)
+func EqualCheck(currVal, equalVal string) (float64, error) {
 	if currVal == "" || equalVal == "" {
 		return 0, errors.New("on of the args is nil")
 	}
