@@ -6,38 +6,39 @@ import (
 	"log"
 )
 
+const MaxFrequency = 1
+
 type MsgSender struct {
 	notifyClient *client.NotifierClient
-	stack        map[KeyMsgSender]int64
+	stack        map[KeyMsg]int64
 }
 
-type KeyMsgSender struct {
+type KeyMsg struct {
 	NodeUuid  string
 	NodeField string
 }
 
-type ValueMsgSender struct {
+type BodyMsg struct {
 	Notify    *notifier.SendNotifier
-	Frequency string
-	tickSend  int64
+	Frequency int64
 }
 
 func CreateMsgSender(notifyClient *client.NotifierClient) MsgSender {
-	newMap := make(map[KeyMsgSender]int64)
+	newMap := make(map[KeyMsg]int64)
 	return MsgSender{
 		notifyClient: notifyClient,
 		stack:        newMap,
 	}
 }
 
-func (s *MsgSender) updateNotifierInStack(notifier ValueMsgSender, keyMsgSender KeyMsgSender) error {
-	if _, exist := s.stack[keyMsgSender]; exist && notifier.Frequency == Max.String() {
+func (s *MsgSender) updateNotifierInStack(notifier BodyMsg, keyMsgSender KeyMsg) error {
+	if _, exist := s.stack[keyMsgSender]; exist && notifier.Frequency == MaxFrequency {
 		delete(s.stack, keyMsgSender)
 		if err := s.notifyClient.SendMessage(notifier.Notify); err != nil {
 			log.Println(err)
 			return err
 		}
-	} else if notifier.Frequency == Max.String() {
+	} else if notifier.Frequency == MaxFrequency {
 		s.notifyClient.SendMessage(notifier.Notify)
 	} else if exist {
 		val := s.stack[keyMsgSender]
@@ -47,12 +48,7 @@ func (s *MsgSender) updateNotifierInStack(notifier ValueMsgSender, keyMsgSender 
 				return err
 			}
 
-			tickDur, err := GetTickFrequency(notifier.Frequency)
-			if err != nil {
-				log.Println(err)
-				return err
-			}
-			s.stack[keyMsgSender] = tickDur
+			s.stack[keyMsgSender] = notifier.Frequency
 
 			return nil
 		}
@@ -63,19 +59,14 @@ func (s *MsgSender) updateNotifierInStack(notifier ValueMsgSender, keyMsgSender 
 			return err
 		}
 
-		tickDur, err := GetTickFrequency(notifier.Frequency)
-		if err != nil {
-			log.Println(err)
-			return err
-		}
-		s.stack[keyMsgSender] = tickDur
+		s.stack[keyMsgSender] = notifier.Frequency
 	}
 
 	return nil
 }
 
 // AddNotifiersToStack - add new notifiers to stack or delete old notifier if new map doest have old one
-func (s *MsgSender) AddNotifiersToStack(messages map[KeyMsgSender]ValueMsgSender) {
+func (s *MsgSender) AddNotifiersToStack(messages map[KeyMsg]BodyMsg) {
 	for key, _ := range s.stack {
 		if _, exist := messages[key]; !exist {
 			s.notifyClient.SendMessage(&notifier.SendNotifier{

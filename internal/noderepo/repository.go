@@ -1,17 +1,17 @@
 package noderepo
 
 import (
-	"fmt"
 	"github.com/adarocket/alerter/internal/client"
 	"github.com/adarocket/alerter/internal/database"
+	"github.com/adarocket/alerter/internal/nodesinfo/msgsender"
 	"github.com/adarocket/alerter/internal/structs"
 	"google.golang.org/grpc"
 )
 
 type NodeRepository struct {
-	notifyClient *client.NotifierClient
-	clientConn   *grpc.ClientConn
-	nodes        []structs.NodesBlockChain
+	notificator msgsender.MsgSender
+	clientConn  *grpc.ClientConn
+	blockChains []structs.NodesBlockChain
 }
 
 func InitNodeRepository(notifyClient *client.NotifierClient, nodesBlockChains []structs.NodesBlockChain,
@@ -22,15 +22,20 @@ func InitNodeRepository(notifyClient *client.NotifierClient, nodesBlockChains []
 	}
 
 	return NodeRepository{
-		notifyClient: notifyClient,
-		clientConn:   clientConn,
-		nodes:        nodesBlockChains,
+		notificator: msgsender.CreateMsgSender(notifyClient),
+		clientConn:  clientConn,
+		blockChains: nodesBlockChains,
 	}
 }
 
 func (r *NodeRepository) ProcessStatistic() {
-	for _, node := range r.nodes {
+	statsMsges := make(map[msgsender.KeyMsg]msgsender.BodyMsg)
+	for _, node := range r.blockChains {
 		statMsg, _ := node.CreateInfoStatMsg()
-		fmt.Println(statMsg)
+		for key, bodyMsg := range statMsg {
+			statsMsges[key] = bodyMsg
+		}
 	}
+
+	r.notificator.AddNotifiersToStack(statsMsges) // TODO remove map struct
 }

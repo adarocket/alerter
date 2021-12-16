@@ -1,55 +1,43 @@
 package nodesinfo
 
 import (
-	"github.com/adarocket/alerter/internal/cache"
 	"github.com/adarocket/alerter/internal/client"
 	"github.com/adarocket/alerter/internal/config"
-	"github.com/adarocket/alerter/internal/controller"
-	"github.com/adarocket/alerter/internal/nodesinfo/msgsender"
-	"github.com/adarocket/proto/proto-gen/cardano"
-	"github.com/adarocket/proto/proto-gen/notifier"
+	"github.com/adarocket/alerter/internal/database"
+	"github.com/adarocket/alerter/internal/noderepo"
+	"github.com/adarocket/alerter/internal/structs"
+	"google.golang.org/grpc"
 	"log"
 	"time"
-
-	"google.golang.org/grpc"
 )
 
-var informClient *client.ControllerClient
 var authClient *client.AuthClient
-var cardanoClient *client.CardanoClient
 
-func StartTracking(timeoutCheck int, notifyAddr string) {
+func StartTracking(timeoutCheck int, notifyAddr string, db database.ModelAlertNode) {
+	conn, _ := auth()
+
 	notifyClient, err := client.NewNotifierClient(notifyAddr)
 	if err != nil {
 		log.Println(err)
 		return
 	}
 
-	msgSender := msgsender.CreateMsgSender(notifyClient)
+	var blockchains []structs.NodesBlockChain
+	cardanoStruct := structs.Cardano{Blockchain: "cardano"}
+	blockchains = append(blockchains, &cardanoStruct)
 
-	for _ = range time.Tick(time.Second * time.Duration(timeoutCheck)) {
-		if err := auth(); err != nil {
-			if err := notifyClient.SendMessage(&notifier.SendNotifier{
-				TextMessage: "controller down"}); err != nil {
-				log.Println(err)
-			}
-			continue
-		}
+	nodeRep := noderepo.InitNodeRepository(notifyClient, blockchains, conn, db)
 
-		nodesMessages, err := getNodesMessages()
-		if err != nil {
-			log.Println(err)
-			continue
-		}
-
-		msgSender.AddNotifiersToStack(nodesMessages)
+	for {
+		nodeRep.ProcessStatistic()
+		time.Sleep(time.Hour * time.Duration(timeoutCheck))
 	}
 }
 
-func auth() error {
+func auth() (*grpc.ClientConn, error) {
 	loadConfig, err := config.LoadConfig()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	clientConn, err := grpc.Dial(loadConfig.ControllerAddr, grpc.WithInsecure())
@@ -61,15 +49,15 @@ func auth() error {
 	token, err := authClient.Login(loadConfig.AuthClientLogin, loadConfig.AuthClientPassword)
 	if err != nil {
 		log.Println(err.Error())
-		return err
+		return nil, err
 	}
 
-	setupInterceptorAndClient(token, loadConfig.ControllerAddr)
+	conn := setupInterceptorAndClient(token, loadConfig.ControllerAddr)
 
-	return nil
+	return conn, nil
 }
 
-func setupInterceptorAndClient(accessToken, serverURL string) {
+func setupInterceptorAndClient(accessToken, serverURL string) *grpc.ClientConn {
 	transportOption := grpc.WithInsecure()
 
 	interceptor, err := client.NewAuthInterceptor(authMethods(), accessToken)
@@ -82,8 +70,7 @@ func setupInterceptorAndClient(accessToken, serverURL string) {
 		log.Fatal("cannot dial server: ", err)
 	}
 
-	informClient = client.NewControllerClient(clientConn)
-	cardanoClient = client.NewCardanoClient(clientConn)
+	return clientConn
 }
 
 func authMethods() map[string]bool {
@@ -91,75 +78,4 @@ func authMethods() map[string]bool {
 		"/cardano.Cardano/" + "GetStatistic":  true, //cardano.Cardano
 		"/Common.Controller/" + "GetNodeList": true, //Common.Controller
 	}
-}
-
-func getNodesMessages() (map[msgsender.KeyMsgSender]msgsender.ValueMsgSender, error) {
-	resp, err := informClient.GetNodeList()
-	if err != nil {
-		log.Println(err)
-		return nil, err
-	}
-
-	cacheInstance := cache.GetCacheInstance()
-	cardanoNodes := make(map[cache.KeyCache]*cardano.SaveStatisticRequest)
-	nodesMessages := make(map[msgsender.KeyMsgSender]msgsender.ValueMsgSender)
-
-	for _, node := range resp.NodeAuthData {
-		switch node.Blockchain {
-		case "cardano":
-			key := cache.KeyCache{
-				Key:      node.Uuid,
-				TypeNode: node.Blockchain,
-			}
-
-			fieldNodeMessages, cardanoNode, err := getCardanoNodeMessages(key)
-			if err != nil {
-				log.Println(err)
-				continue
-			}
-
-			for key, val := range fieldNodeMessages {
-				nodesMessages[key] = val
-			}
-
-			cardanoNodes[key] = cardanoNode
-		}
-	}
-
-	cacheInstance.AddNewInform(cardanoNodes)
-	return nodesMessages, nil
-}
-
-func getCardanoNodeMessages(key cache.KeyCache) (
-	fieldNodeMessages map[msgsender.KeyMsgSender]msgsender.ValueMsgSender,
-	resp *cardano.SaveStatisticRequest, err error) {
-
-	resp, err = cardanoClient.GetStatistic(key.Key)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-
-	if resp.NodeAuthData.Uuid == "" {
-		return
-	}
-
-	db := controller.GetAlertNodeControllerInstance()
-	alerts, err := db.GetAlertsByNodeUuid(resp.NodeAuthData.Uuid)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-
-	if len(alerts) == 0 {
-		return
-	}
-
-	fieldNodeMessages, err = CheckFieldsOfNode(resp, key, alerts)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-
-	return fieldNodeMessages, resp, nil
 }

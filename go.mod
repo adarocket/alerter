@@ -3,6 +3,7 @@ module github.com/adarocket/alerter
 go 1.16
 
 require (
+	github.com/Knetic/govaluate v3.0.0+incompatible // indirect
 	github.com/adarocket/proto v0.4.1
 	github.com/bykovme/goconfig v0.0.0-20170717154220-caa70d3abfca
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
