@@ -11,6 +11,7 @@ import (
 	pb "github.com/adarocket/proto/proto-gen/notifier"
 	"github.com/tidwall/gjson"
 	"log"
+	"strconv"
 	"time"
 )
 
@@ -45,7 +46,8 @@ func CheckFieldsOfNode(newNode interface{}, oldNode interface{},
 			oldValue = oldVal.String()
 		}
 
-		diffVal, err := calculateDiffVal(alert, oldValue, value)
+		//  func checkField(alert, oldValue, value) (isValid bool, msg string, err error)
+		diffVal, err := calculateDiffVal(alert, oldValue, value.String())
 		if err != nil {
 			log.Println(err)
 			continue
@@ -85,24 +87,22 @@ func calculateFrequency(diffValue float64, formula string) (float64, error) {
 		return 0, err
 	}
 
-	frequency, _, _, err := checker.ParseToFloat64(result, nil, nil)
-	if err != nil {
-		log.Println(err)
-		return 0, err
+	frequency, isFloat := result.(float64)
+	if !isFloat {
+		return 0, errors.New("cant calculate frequency")
 	}
-	//fmt.Println(reflect.TypeOf(result), result)
 
 	return frequency, nil
 }
 
-func calculateDiffVal(alert db.AlertNodeAndAlert, oldValue string, value gjson.Result) (float64, error) {
+func calculateDiffVal(alert db.AlertNodeAndAlert, oldValue string, value string) (float64, error) {
 	var diffVal float64
 	var err error
 
 	switch alert.TypeChecker {
 	case checker.IntervalT.String():
 		diffVal, err = checker.IntervalTest(alert.NormalFrom,
-			alert.NormalTo, value.String())
+			alert.NormalTo, value)
 		if err != nil {
 			log.Println(err)
 			return 0, err
@@ -111,14 +111,14 @@ func calculateDiffVal(alert db.AlertNodeAndAlert, oldValue string, value gjson.R
 		if oldValue == "" {
 			return 0, errors.New("old val does not exist")
 		}
-		diffVal, err = checker.ChangeUpTest(oldValue, value.String())
+		diffVal, err = checker.ChangeUpTest(oldValue, value)
 		if err != nil {
 			log.Println(err)
 			return 0, err
 		}
 	case checker.ChangeDownT.String():
 	case checker.DateT.String():
-		tm, err := time.Parse("2006-01-02 15:04:05 -0700 MST", value.String())
+		tm, err := time.Parse("2006-01-02 15:04:05 -0700 MST", value)
 		if err != nil {
 			log.Println(err)
 			return 0, err
@@ -132,13 +132,13 @@ func calculateDiffVal(alert db.AlertNodeAndAlert, oldValue string, value gjson.R
 		if oldValue == "" {
 			return 0, errors.New("old val does not exist")
 		}
-		diffVal, err = checker.EqualCheckTest(value.String(), oldValue)
+		diffVal, err = checker.EqualCheckTest(value, oldValue)
 		if err != nil {
 			log.Println(err)
 			return 0, err
 		}
 	case checker.MoreT.String():
-		diffVal, _, _, err = checker.ParseToFloat64(value.String(), nil, nil)
+		diffVal, err = strconv.ParseFloat(value, 64)
 		if err != nil {
 			log.Println(err)
 			return 0, err
@@ -172,7 +172,7 @@ func createMsg(alert db.AlertNodeAndAlert,
 		msg.Notify.To = fmt.Sprintf("%f", alert.NormalTo)
 	} else {
 		return msgsender.BodyMsg{},
-			errors.New("something goes wrong while creating notify")
+			errors.New("something goes wrong while creating notify") // not error!!!
 	}
 
 	msg.Notify.CurrentVal = value.String()

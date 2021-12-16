@@ -37,5 +37,5 @@ func (r *NodeRepository) ProcessStatistic() {
 		}
 	}
 
-	r.notificator.AddNotifiersToStack(statsMsges) // TODO remove map struct
+	r.notificator.AddNotifiersToStack(statsMsges)
 }

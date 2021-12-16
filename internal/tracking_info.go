@@ -1,11 +1,11 @@
 package internal
 
 import (
+	"database/sql"
 	"github.com/adarocket/alerter/internal/blockchainrepo"
 	"github.com/adarocket/alerter/internal/blockchainrepo/blockchain"
 	"github.com/adarocket/alerter/internal/client"
 	"github.com/adarocket/alerter/internal/config"
-	"github.com/adarocket/alerter/internal/database/db"
 	"google.golang.org/grpc"
 	"log"
 	"time"
@@ -13,7 +13,7 @@ import (
 
 var authClient *client.AuthClient
 
-func StartTracking(timeoutCheck int, notifyAddr string, db db.ModelAlertNode) {
+func StartTracking(timeoutCheck int, notifyAddr string, db *sql.DB) {
 	conn, _ := auth()
 
 	notifyClient, err := client.NewNotifierClient(notifyAddr)
@@ -22,20 +22,19 @@ func StartTracking(timeoutCheck int, notifyAddr string, db db.ModelAlertNode) {
 		return
 	}
 
-	var blockchains []blockchain.NodesBlockChain
-	cardanoStruct := blockchain.Cardano{Blockchain: "cardano"}
-	blockchains = append(blockchains, &cardanoStruct)
+	blockchains := []blockchain.NodesBlockChain{
+		&blockchain.Cardano{Blockchain: "cardano"},
+	}
 
 	nodeRep := blockchainrepo.InitNodeRepository(notifyClient, blockchains, conn, db)
-
 	for {
 		nodeRep.ProcessStatistic()
-		time.Sleep(time.Hour * time.Duration(timeoutCheck))
+		time.Sleep(time.Second * time.Duration(timeoutCheck))
 	}
 }
 
 func auth() (*grpc.ClientConn, error) {
-	loadConfig, err := config.LoadConfig()
+	loadConfig, err := config.LoadConfig() // load config загружвется несколько раз
 	if err != nil {
 		return nil, err
 	}

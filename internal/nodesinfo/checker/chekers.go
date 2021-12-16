@@ -8,12 +8,14 @@ import (
 	"time"
 )
 
-func IntervalTest(bottomLine, topLine, val interface{}) (float64, error) {
-	if bottomLine == nil || topLine == nil || val == nil {
+// rebuild it
+func IntervalTest(bottomLine, topLine float64, val string) (float64, error) {
+	if val == "" {
 		return 0, errors.New("on of the args is nil")
 	}
 
-	_, _, valF, err := ParseToFloat64(nil, nil, val)
+	valF, err := strconv.ParseFloat(val, 64)
+
 	if err != nil {
 		log.Println(err)
 		return 0, err
@@ -23,12 +25,17 @@ func IntervalTest(bottomLine, topLine, val interface{}) (float64, error) {
 }
 
 // ChangeUpTest - returns 0 if newVal - oldVal < 0, in other cases diff
-func ChangeUpTest(oldVal, newVal interface{}) (float64, error) {
-	if oldVal == nil || newVal == nil {
+func ChangeUpTest(oldVal, newVal string) (float64, error) {
+	if oldVal == "" || newVal == "" {
 		return 0, errors.New("on of the args is nil")
 	}
 
-	oldValF, newValF, _, err := ParseToFloat64(oldVal, newVal, nil)
+	oldValF, err := strconv.ParseFloat(oldVal, 64)
+	if err != nil {
+		log.Println(err)
+		return 0, err
+	}
+	newValF, err := strconv.ParseFloat(newVal, 64)
 	if err != nil {
 		log.Println(err)
 		return 0, err
@@ -41,12 +48,17 @@ func ChangeUpTest(oldVal, newVal interface{}) (float64, error) {
 	}
 }
 
-func ChangeDownTest(oldVal, newVal interface{}) (float64, error) {
-	if oldVal == nil || newVal == nil {
+func ChangeDownTest(oldVal, newVal string) (float64, error) {
+	if oldVal == "" || newVal == "" {
 		return 0, errors.New("on of the args is nil")
 	}
 
-	oldValF, newValF, _, err := ParseToFloat64(oldVal, newVal, nil)
+	oldValF, err := strconv.ParseFloat(oldVal, 64)
+	if err != nil {
+		log.Println(err)
+		return 0, err
+	}
+	newValF, err := strconv.ParseFloat(newVal, 64)
 	if err != nil {
 		log.Println(err)
 		return 0, err
@@ -59,29 +71,23 @@ func ChangeDownTest(oldVal, newVal interface{}) (float64, error) {
 	}
 }
 
-// DateCheckTest - returns (val - current data) in unix format
-func DateCheckTest(val interface{}) (float64, error) {
-	if val == nil {
-		return 0, errors.New("on of the args is nil")
-	}
-
-	var dat time.Time
-	if a, isTr := val.(time.Time); isTr {
-		dat = a
-	} else {
-		return 0, errors.New("invalid date type")
-	}
-
-	return float64(dat.Unix() - time.Now().Unix()), nil
+// DateCheckTest - returns (val - current data) in days
+func DateCheckTest(val time.Time) (float64, error) {
+	return val.Sub(time.Now()).Hours(), nil
 }
 
 // EqualCheckTest - returns abs(currValF - equalValF)
-func EqualCheckTest(currVal, equalVal interface{}) (float64, error) {
-	if currVal == nil || equalVal == nil {
+func EqualCheckTest(currVal, equalVal string) (float64, error) {
+	if currVal == "" || equalVal == "" {
 		return 0, errors.New("on of the args is nil")
 	}
 
-	currValF, equalValF, _, err := ParseToFloat64(currVal, equalVal, nil)
+	currValF, err := strconv.ParseFloat(currVal, 64)
+	if err != nil {
+		log.Println(err)
+		return 0, err
+	}
+	equalValF, err := strconv.ParseFloat(equalVal, 64)
 	if err != nil {
 		log.Println(err)
 		return 0, err
@@ -90,7 +96,7 @@ func EqualCheckTest(currVal, equalVal interface{}) (float64, error) {
 	return math.Abs(currValF - equalValF), nil
 }
 
-func ParseToFloat64(val1, val2, val3 interface{}) (val1F float64,
+/*func ParseToFloat64(val1, val2, val3 interface{}) (val1F float64,
 	val2F float64, val3F float64, err error) {
 
 	if val1 != nil {
@@ -122,4 +128,4 @@ func ParseToFloat64(val1, val2, val3 interface{}) (val1F float64,
 	}
 
 	return
-}
+}*/
