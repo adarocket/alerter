@@ -1,11 +1,11 @@
-package nodesinfo
+package internal
 
 import (
+	"github.com/adarocket/alerter/internal/blockchainrepo"
+	"github.com/adarocket/alerter/internal/blockchainrepo/blockchain"
 	"github.com/adarocket/alerter/internal/client"
 	"github.com/adarocket/alerter/internal/config"
-	"github.com/adarocket/alerter/internal/database"
-	"github.com/adarocket/alerter/internal/noderepo"
-	"github.com/adarocket/alerter/internal/structs"
+	"github.com/adarocket/alerter/internal/database/db"
 	"google.golang.org/grpc"
 	"log"
 	"time"
@@ -13,7 +13,7 @@ import (
 
 var authClient *client.AuthClient
 
-func StartTracking(timeoutCheck int, notifyAddr string, db database.ModelAlertNode) {
+func StartTracking(timeoutCheck int, notifyAddr string, db db.ModelAlertNode) {
 	conn, _ := auth()
 
 	notifyClient, err := client.NewNotifierClient(notifyAddr)
@@ -22,11 +22,11 @@ func StartTracking(timeoutCheck int, notifyAddr string, db database.ModelAlertNo
 		return
 	}
 
-	var blockchains []structs.NodesBlockChain
-	cardanoStruct := structs.Cardano{Blockchain: "cardano"}
+	var blockchains []blockchain.NodesBlockChain
+	cardanoStruct := blockchain.Cardano{Blockchain: "cardano"}
 	blockchains = append(blockchains, &cardanoStruct)
 
-	nodeRep := noderepo.InitNodeRepository(notifyClient, blockchains, conn, db)
+	nodeRep := blockchainrepo.InitNodeRepository(notifyClient, blockchains, conn, db)
 
 	for {
 		nodeRep.ProcessStatistic()

@@ -1,4 +1,4 @@
-package database
+package db
 
 type Alerts struct {
 	ID           int64

@@ -1,15 +1,15 @@
 package controller
 
 import (
-	"github.com/adarocket/alerter/internal/database"
+	"github.com/adarocket/alerter/internal/database/db"
 	"log"
 )
 
 type AlertNode struct {
-	db database.ModelAlertNode
+	db db.ModelAlertNode
 }
 
-func (c *AlertNode) GetAlertNodesByID(alertNodeID int64) ([]database.AlertNode, error) {
+func (c *AlertNode) GetAlertNodesByID(alertNodeID int64) ([]db.AlertNode, error) {
 	objs, err := c.db.GetAlertNodesByID(alertNodeID)
 	if err != nil {
 		log.Println(err)
@@ -19,7 +19,7 @@ func (c *AlertNode) GetAlertNodesByID(alertNodeID int64) ([]database.AlertNode, 
 	return objs, nil
 }
 
-func (c *AlertNode) GetAlertsByNodeUuid(nodeUuid string) ([]database.AlertNodeAndAlert, error) {
+func (c *AlertNode) GetAlertsByNodeUuid(nodeUuid string) ([]db.AlertNodeAndAlert, error) {
 	objs, err := c.db.GetAlertsByNodeUuid(nodeUuid)
 	if err != nil {
 		log.Println(err)
@@ -29,7 +29,7 @@ func (c *AlertNode) GetAlertsByNodeUuid(nodeUuid string) ([]database.AlertNodeAn
 	return objs, nil
 }
 
-func (c *AlertNode) GetAlertNodeByIdAndNodeUuid(alertId int64, nodeUuid string) (database.AlertNode, error) {
+func (c *AlertNode) GetAlertNodeByIdAndNodeUuid(alertId int64, nodeUuid string) (db.AlertNode, error) {
 	objs, err := c.db.GetAlertNodeByIdAndNodeUuid(alertId, nodeUuid)
 	if err != nil {
 		log.Println(err)
@@ -39,7 +39,7 @@ func (c *AlertNode) GetAlertNodeByIdAndNodeUuid(alertId int64, nodeUuid string) 
 	return objs, nil
 }
 
-func (c *AlertNode) CreateAlertNode(alertNode database.AlertNode) error {
+func (c *AlertNode) CreateAlertNode(alertNode db.AlertNode) error {
 	err := c.db.CreateAlertNode(alertNode)
 	if err != nil {
 		log.Println(err)
@@ -59,7 +59,7 @@ func (c *AlertNode) DeleteAlertNode(alertNodeID int64, nodeUuid string) error {
 	return nil
 }
 
-func (c *AlertNode) UpdateAlertNode(alertNode database.AlertNode) error {
+func (c *AlertNode) UpdateAlertNode(alertNode db.AlertNode) error {
 	err := c.db.UpdateAlertNode(alertNode)
 	if err != nil {
 		log.Println(err)

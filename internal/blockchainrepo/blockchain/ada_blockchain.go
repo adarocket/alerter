@@ -1,23 +1,23 @@
-package structs
+package blockchain
 
 import (
 	"github.com/adarocket/alerter/internal/cache"
 	"github.com/adarocket/alerter/internal/client"
-	"github.com/adarocket/alerter/internal/database"
+	"github.com/adarocket/alerter/internal/database/db"
+	"github.com/adarocket/alerter/internal/msgsender"
 	"github.com/adarocket/alerter/internal/nodesinfo"
-	"github.com/adarocket/alerter/internal/nodesinfo/msgsender"
 	"google.golang.org/grpc"
 	"log"
 )
 
 type Cardano struct {
 	Blockchain    string
-	db            database.ModelAlertNode
+	db            db.ModelAlertNode
 	cardanoClient *client.CardanoClient
 	informClient  *client.ControllerClient
 }
 
-func (c *Cardano) Init(clientConn *grpc.ClientConn, db database.ModelAlertNode) {
+func (c *Cardano) Init(clientConn *grpc.ClientConn, db db.ModelAlertNode) {
 	c.informClient = client.NewControllerClient(clientConn)
 	c.cardanoClient = client.NewCardanoClient(clientConn)
 	c.db = db

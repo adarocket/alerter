@@ -1,8 +1,8 @@
 package web
 
 import (
-	"github.com/adarocket/alerter/internal/controller"
-	database2 "github.com/adarocket/alerter/internal/database"
+	"github.com/adarocket/alerter/internal/database/controller"
+	database2 "github.com/adarocket/alerter/internal/database/db"
 	"github.com/gin-gonic/gin"
 	"html/template"
 	"log"

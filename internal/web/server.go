@@ -3,7 +3,7 @@ package web
 import (
 	"embed"
 	"fmt"
-	"github.com/adarocket/alerter/internal/controller"
+	"github.com/adarocket/alerter/internal/database/controller"
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
