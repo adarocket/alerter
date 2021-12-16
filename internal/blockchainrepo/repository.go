@@ -1,9 +1,9 @@
 package blockchainrepo
 
 import (
+	"database/sql"
 	"github.com/adarocket/alerter/internal/blockchainrepo/blockchain"
 	"github.com/adarocket/alerter/internal/client"
-	"github.com/adarocket/alerter/internal/database/db"
 	"github.com/adarocket/alerter/internal/msgsender"
 	"google.golang.org/grpc"
 )
@@ -15,7 +15,7 @@ type NodeRepository struct {
 }
 
 func InitNodeRepository(notifyClient *client.NotifierClient, nodesBlockChains []blockchain.NodesBlockChain,
-	clientConn *grpc.ClientConn, db db.ModelAlertNode) NodeRepository {
+	clientConn *grpc.ClientConn, db *sql.DB) NodeRepository {
 
 	for _, chain := range nodesBlockChains {
 		chain.Init(clientConn, db)

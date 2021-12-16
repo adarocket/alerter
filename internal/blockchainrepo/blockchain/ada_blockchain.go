@@ -1,6 +1,7 @@
 package blockchain
 
 import (
+	"database/sql"
 	"github.com/adarocket/alerter/internal/cache"
 	"github.com/adarocket/alerter/internal/client"
 	"github.com/adarocket/alerter/internal/database/db"
@@ -17,10 +18,10 @@ type Cardano struct {
 	informClient  *client.ControllerClient
 }
 
-func (c *Cardano) Init(clientConn *grpc.ClientConn, db db.ModelAlertNode) {
-	c.informClient = client.NewControllerClient(clientConn)
+func (c *Cardano) Init(clientConn *grpc.ClientConn, dbConn *sql.DB) {
+	c.informClient = client.NewControllerClient(clientConn) // common controller вынести выше
 	c.cardanoClient = client.NewCardanoClient(clientConn)
-	c.db = db
+	c.db = db.NewAlertNodeInstance(dbConn)
 }
 
 func (c *Cardano) CreateInfoStatMsg() (map[msgsender.KeyMsg]msgsender.BodyMsg, error) {
@@ -34,7 +35,7 @@ func (c *Cardano) CreateInfoStatMsg() (map[msgsender.KeyMsg]msgsender.BodyMsg, e
 	messages := map[msgsender.KeyMsg]msgsender.BodyMsg{}
 
 	for _, node := range resp.NodeAuthData {
-		if node.Blockchain == c.Blockchain {
+		if node.Blockchain == c.Blockchain || node.Blockchain == "" { // temp " " == cardano
 			alerts, err := c.db.GetAlertsByNodeUuid(node.Uuid)
 			if err != nil {
 				log.Println(err)
