@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"github.com/adarocket/alerter/internal/cache"
 	"github.com/adarocket/alerter/internal/client"
-	"github.com/adarocket/alerter/internal/database/db"
+	"github.com/adarocket/alerter/internal/database/model"
 	"github.com/adarocket/alerter/internal/msgsender"
 	"github.com/adarocket/alerter/internal/nodesinfo"
 	"google.golang.org/grpc"
@@ -13,7 +13,7 @@ import (
 
 type Cardano struct {
 	Blockchain    string
-	db            db.ModelAlertNode
+	db            model.ModelAlertNode
 	cardanoClient *client.CardanoClient
 	informClient  *client.ControllerClient
 }
@@ -21,7 +21,7 @@ type Cardano struct {
 func (c *Cardano) Init(clientConn *grpc.ClientConn, dbConn *sql.DB) {
 	c.informClient = client.NewControllerClient(clientConn) // common controller вынести выше
 	c.cardanoClient = client.NewCardanoClient(clientConn)
-	c.db = db.NewAlertNodeInstance(dbConn)
+	c.db = model.NewAlertNodeInstance(dbConn)
 }
 
 func (c *Cardano) CreateInfoStatMsg() (map[msgsender.KeyMsg]msgsender.BodyMsg, error) {

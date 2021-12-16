@@ -2,7 +2,7 @@ package web
 
 import (
 	"github.com/adarocket/alerter/internal/database/controller"
-	"github.com/adarocket/alerter/internal/database/db"
+	"github.com/adarocket/alerter/internal/database/model"
 	"github.com/gin-gonic/gin"
 	"html/template"
 	"log"
@@ -89,7 +89,7 @@ func (a *AlertNodeHandlers) createAlertNode(c *gin.Context) {
 	frequency := c.Request.FormValue("Frequency")
 	nodeUuid := c.Request.FormValue("NodeUuid")
 
-	alertNode := db.AlertNode{
+	alertNode := model.AlertNode{
 		AlertID:      id,
 		NormalFrom:   normalFrom,
 		NormalTo:     normalTo,
@@ -141,7 +141,7 @@ func (a *AlertNodeHandlers) GetAlertNodeByIDAndUuid(c *gin.Context) {
 }
 
 func (a *AlertNodeHandlers) updateAlertNode(c *gin.Context) {
-	alertNode := db.AlertNode{}
+	alertNode := model.AlertNode{}
 	var err error
 	if alertNode.NormalFrom, err = strconv.ParseFloat(c.Request.FormValue("NormalFrom"), 64); err != nil {
 		log.Println(err)

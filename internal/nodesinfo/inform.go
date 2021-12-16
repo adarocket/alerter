@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/Knetic/govaluate"
-	"github.com/adarocket/alerter/internal/database/db"
+	"github.com/adarocket/alerter/internal/database/model"
 	"github.com/adarocket/alerter/internal/msgsender"
 	"github.com/adarocket/alerter/internal/nodesinfo/checker"
 	pb "github.com/adarocket/proto/proto-gen/notifier"
@@ -19,7 +19,7 @@ const msgTemplateType = "Node %s, field %s, cheker type: %s"
 
 // CheckFieldsOfNode - checking fields of node and create notifiers messages
 func CheckFieldsOfNode(newNode interface{}, oldNode interface{},
-	alerts []db.AlertNodeAndAlert) (map[msgsender.KeyMsg]msgsender.BodyMsg, error) {
+	alerts []model.AlertNodeAndAlert) (map[msgsender.KeyMsg]msgsender.BodyMsg, error) {
 
 	newNodeJSON, err := json.Marshal(&newNode)
 	if err != nil {
@@ -95,7 +95,7 @@ func calculateFrequency(diffValue float64, formula string) (float64, error) {
 	return frequency, nil
 }
 
-func calculateDiffVal(alert db.AlertNodeAndAlert, oldValue string, value string) (float64, error) {
+func calculateDiffVal(alert model.AlertNodeAndAlert, oldValue string, value string) (float64, error) {
 	var diffVal float64
 	var err error
 
@@ -151,7 +151,7 @@ func calculateDiffVal(alert db.AlertNodeAndAlert, oldValue string, value string)
 	return diffVal, nil
 }
 
-func createMsg(alert db.AlertNodeAndAlert,
+func createMsg(alert model.AlertNodeAndAlert,
 	diffVal float64, value gjson.Result) (msgsender.BodyMsg, error) {
 	msg := msgsender.BodyMsg{
 		Notify: &pb.SendNotifier{},

@@ -2,7 +2,7 @@ package controller
 
 import (
 	"database/sql"
-	"github.com/adarocket/alerter/internal/database/db"
+	"github.com/adarocket/alerter/internal/database/model"
 )
 
 var alertNodeController AlertNode
@@ -10,8 +10,8 @@ var alertController Alert
 
 // InitializeControllerInstances - init alert and alertNode instances
 func InitializeControllerInstances(database *sql.DB) {
-	alertController.db = db.NewAlertInstance(database)
-	alertNodeController.db = db.NewAlertNodeInstance(database)
+	alertController.db = model.NewAlertInstance(database)
+	alertNodeController.db = model.NewAlertNodeInstance(database)
 }
 
 func GetAlertControllerInstance() Alert {

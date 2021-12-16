@@ -1,15 +1,15 @@
 package controller
 
 import (
-	"github.com/adarocket/alerter/internal/database/db"
+	"github.com/adarocket/alerter/internal/database/model"
 	"log"
 )
 
 type Alert struct {
-	db db.ModelAlert
+	db model.ModelAlert
 }
 
-func (a *Alert) GetAlertByID(alertID int64) (db.Alerts, error) {
+func (a *Alert) GetAlertByID(alertID int64) (model.Alerts, error) {
 	objs, err := a.db.GetAlertByID(alertID)
 	if err != nil {
 		log.Println(err)
@@ -19,7 +19,7 @@ func (a *Alert) GetAlertByID(alertID int64) (db.Alerts, error) {
 	return objs, nil
 }
 
-func (a *Alert) GetAlerts() ([]db.Alerts, error) {
+func (a *Alert) GetAlerts() ([]model.Alerts, error) {
 	objs, err := a.db.GetAlerts()
 	if err != nil {
 		log.Println(err)
@@ -29,7 +29,7 @@ func (a *Alert) GetAlerts() ([]db.Alerts, error) {
 	return objs, nil
 }
 
-func (a *Alert) CreateAlert(alert db.Alerts) error {
+func (a *Alert) CreateAlert(alert model.Alerts) error {
 	err := a.db.CreateAlert(alert)
 	if err != nil {
 		log.Println(err)
@@ -39,7 +39,7 @@ func (a *Alert) CreateAlert(alert db.Alerts) error {
 	return nil
 }
 
-func (a *Alert) UpdateAlert(alert db.Alerts) error {
+func (a *Alert) UpdateAlert(alert model.Alerts) error {
 	err := a.db.UpdateAlert(alert)
 	if err != nil {
 		log.Println(err)
