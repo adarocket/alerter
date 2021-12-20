@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"github.com/adarocket/alerter/internal/blockchainrepo/blockchain"
 	"github.com/adarocket/alerter/internal/client"
+	"github.com/adarocket/alerter/internal/config"
 	"github.com/adarocket/alerter/internal/msgsender"
 	"google.golang.org/grpc"
 )
@@ -12,19 +13,31 @@ type NodeRepository struct {
 	notificator msgsender.MsgSender
 	clientConn  *grpc.ClientConn
 	blockChains []blockchain.NodesBlockChain
+	db          *sql.DB
+	connectFunc func(conf config.Config) (*grpc.ClientConn, error)
 }
 
-func InitNodeRepository(notifyClient *client.NotifierClient, nodesBlockChains []blockchain.NodesBlockChain,
-	clientConn *grpc.ClientConn, db *sql.DB) NodeRepository {
-
-	for _, chain := range nodesBlockChains {
-		chain.ConnectServices(clientConn, db)
-	}
+func InitNodeRepository(notifyClient *client.NotifierClient,
+	nodesBlockChains []blockchain.NodesBlockChain,
+	connectFunc func(conf config.Config) (*grpc.ClientConn, error),
+	conf config.Config,
+	db *sql.DB) NodeRepository {
+	clientConn, _ := connectFunc(conf)
 
 	return NodeRepository{
 		notificator: msgsender.CreateMsgSender(notifyClient),
 		clientConn:  clientConn,
 		blockChains: nodesBlockChains,
+		db:          db,
+		connectFunc: connectFunc,
+	}
+}
+
+func (r *NodeRepository) ReConnectNodeRepositoryServices(conf config.Config) {
+	conn, _ := r.connectFunc(conf)
+
+	for _, chain := range r.blockChains {
+		chain.ConnectServices(conn, r.db)
 	}
 }
 
