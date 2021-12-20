@@ -7,6 +7,7 @@ import (
 	"github.com/adarocket/alerter/internal/config"
 	"github.com/adarocket/alerter/internal/msgsender"
 	"google.golang.org/grpc"
+	"log"
 )
 
 type NodeRepository struct {
@@ -33,7 +34,7 @@ func InitNodeRepository(notifyClient *client.NotifierClient,
 	}
 }
 
-func (r *NodeRepository) ReConnectNodeRepositoryServices(conf config.Config) {
+func (r *NodeRepository) ConnectNodeRepositoryServices(conf config.Config) {
 	conn, _ := r.connectFunc(conf)
 
 	for _, chain := range r.blockChains {
@@ -44,7 +45,12 @@ func (r *NodeRepository) ReConnectNodeRepositoryServices(conf config.Config) {
 func (r *NodeRepository) ProcessStatistic() {
 	statsMsges := make(map[msgsender.KeyMsg]msgsender.BodyMsg)
 	for _, node := range r.blockChains {
-		statMsg, _ := node.CreateInfoStatMsg()
+		statMsg, err := node.CreateInfoStatMsg()
+		if err != nil {
+			log.Println(err)
+			continue
+		}
+
 		for key, bodyMsg := range statMsg {
 			statsMsges[key] = bodyMsg
 		}
