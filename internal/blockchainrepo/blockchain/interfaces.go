@@ -7,6 +7,6 @@ import (
 )
 
 type NodesBlockChain interface {
-	Init(clientConn *grpc.ClientConn, db *sql.DB)
+	ConnectServices(clientConn *grpc.ClientConn, db *sql.DB)
 	CreateInfoStatMsg() (map[msgsender.KeyMsg]msgsender.BodyMsg, error)
 }

@@ -18,7 +18,7 @@ func InitNodeRepository(notifyClient *client.NotifierClient, nodesBlockChains []
 	clientConn *grpc.ClientConn, db *sql.DB) NodeRepository {
 
 	for _, chain := range nodesBlockChains {
-		chain.Init(clientConn, db)
+		chain.ConnectServices(clientConn, db)
 	}
 
 	return NodeRepository{

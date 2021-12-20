@@ -18,8 +18,8 @@ type Cardano struct {
 	informClient  *client.ControllerClient
 }
 
-func (c *Cardano) Init(clientConn *grpc.ClientConn, dbConn *sql.DB) {
-	c.informClient = client.NewControllerClient(clientConn) // common controller вынести выше
+func (c *Cardano) ConnectServices(clientConn *grpc.ClientConn, dbConn *sql.DB) {
+	c.informClient = client.NewControllerClient(clientConn)
 	c.cardanoClient = client.NewCardanoClient(clientConn)
 	c.db = model.NewAlertNodeInstance(dbConn)
 }
