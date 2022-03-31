@@ -23,8 +23,8 @@ func StartTracking(loadConfig config.Config, db *sql.DB) {
 	}
 
 	nodeRep := blockchainrepo.InitNodeRepository(notifyClient, blockchains, auth.Auth, loadConfig, db)
+	nodeRep.ConnectNodeRepositoryServices(loadConfig)
 	for {
-		nodeRep.ConnectNodeRepositoryServices(loadConfig)
 		nodeRep.ProcessStatistic()
 		time.Sleep(time.Second * time.Duration(loadConfig.TimeoutCheck))
 	}
