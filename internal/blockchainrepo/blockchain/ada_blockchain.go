@@ -23,6 +23,7 @@ func (c *Cardano) ConnectServices(clientConn *grpc.ClientConn, dbConn *sql.DB) {
 	c.informClient = client.NewControllerClient(clientConn)
 	c.cardanoClient = client.NewCardanoClient(clientConn)
 	c.db = model.NewAlertNodeInstance(dbConn)
+	c.oldCardanoNodes = make(map[string]*cardano.SaveStatisticRequest)
 }
 
 func (c *Cardano) CreateInfoStatMsg() (map[msgsender.KeyMsg]msgsender.BodyMsg, error) {
@@ -41,11 +42,14 @@ func (c *Cardano) CreateInfoStatMsg() (map[msgsender.KeyMsg]msgsender.BodyMsg, e
 				log.Println(err)
 				return messages, err
 			} else if len(alerts) == 0 {
-				continue
+				//continue
 			}
 
-			cardanoNode, _ := c.cardanoClient.GetStatistic(node.Uuid)
-
+			cardanoNode, err := c.cardanoClient.GetStatistic(node.Uuid)
+			if err != nil {
+				log.Println(err)
+				continue
+			}
 			msg, _ := nodesinfo.CheckFieldsOfNode(cardanoNode, c.oldCardanoNodes[node.Uuid], alerts)
 			for keyMsg, bodyMsg := range msg {
 				messages[keyMsg] = bodyMsg
