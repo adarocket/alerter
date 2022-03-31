@@ -167,7 +167,7 @@ func createMsgIfDiffNotValid(alert model.AlertNodeAndAlert,
 		frequency, err := calculateFrequency(diffVal, alert.Frequency)
 		if err != nil {
 			log.Println(err)
-			return
+			return msg, true, err
 		}
 		msg.Frequency = int64(frequency)
 		msg.Notify.From = fmt.Sprintf("%f", alert.NormalFrom)
