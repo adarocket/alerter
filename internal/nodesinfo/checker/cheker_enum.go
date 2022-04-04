@@ -3,23 +3,25 @@ package checker
 type TypeChek int
 
 const (
-	IntervalT TypeChek = 1 + iota
-	ChangeUpT
-	ChangeDownT
-	DateT
-	MoreT
-	LessT
-	EqualT
+	IntervalT       = TypeChek(1)
+	ChangeUpT       = TypeChek(2)
+	ChangeDownT     = TypeChek(3)
+	DateT           = TypeChek(4)
+	MoreT           = TypeChek(5)
+	LessT           = TypeChek(6)
+	EqualT          = TypeChek(7)
+	CheckCardanoVer = TypeChek(8)
 )
 
-var chekersTypes = [...]string{
-	"Interval",
-	"ChangeUp",
-	"ChangeDown",
-	"Date",
-	"More",
-	"Less",
-	"Equal",
+var chekersTypes = map[TypeChek]string{
+	IntervalT:       "Interval",
+	ChangeUpT:       "ChangeUp",
+	ChangeDownT:     "ChangeDown",
+	DateT:           "Date",
+	MoreT:           "More",
+	LessT:           "Less",
+	EqualT:          "Equal",
+	CheckCardanoVer: "CheckCardanoVer",
 }
 
 func (tc TypeChek) String() string {
