@@ -145,6 +145,17 @@ func calculateDiffVal(alert model.AlertNodeAndAlert, oldValue string, value stri
 			log.Println(err)
 			return 0, err
 		}
+	case checker.CheckCardanoVer.String():
+		outdated, err := checker.IsCardanoVersionOutdated(value)
+		if err != nil {
+			log.Println(err)
+			return 0, err
+		}
+		if outdated {
+			return 1, nil
+		} else {
+			return 0, nil
+		}
 	default:
 		log.Println("undefined checker type")
 		return 0, errors.New("undefined checker type")
