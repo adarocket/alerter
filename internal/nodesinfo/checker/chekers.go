@@ -1,9 +1,13 @@
 package checker
 
 import (
+	"encoding/json"
 	"errors"
+	"github.com/hashicorp/go-version"
+	"io"
 	"log"
 	"math"
+	"net/http"
 	"strconv"
 	"time"
 )
@@ -96,36 +100,42 @@ func EqualCheck(currVal, equalVal string) (float64, error) {
 	return math.Abs(currValF - equalValF), nil
 }
 
-/*func ParseToFloat64(val1, val2, val3 interface{}) (val1F float64,
-	val2F float64, val3F float64, err error) {
-
-	if val1 != nil {
-		if str, ok := val1.(string); ok {
-			val1F, _ = strconv.ParseFloat(str, 64)
-		} else if val1F, ok = val1.(float64); ok {
-		} else {
-			err = errors.New("invalid type")
-			return
-		}
-	}
-	if val2 != nil {
-		if str, ok := val2.(string); ok {
-			val2F, _ = strconv.ParseFloat(str, 64)
-		} else if val2F, ok = val2.(float64); ok {
-		} else {
-			err = errors.New("invalid type")
-			return
-		}
-	}
-	if val3 != nil {
-		if str, ok := val3.(string); ok {
-			val3F, _ = strconv.ParseFloat(str, 64)
-		} else if val3F, ok = val3.(float64); ok {
-		} else {
-			err = errors.New("invalid type")
-			return
-		}
+func IsCardanoVersionOutdated(currVersion string) (bool, error) {
+	res, err := http.Get("https://api.github.com/repos/adarocket/informer/releases/latest")
+	if err != nil {
+		log.Println(err)
+		return false, err
 	}
 
-	return
-}*/
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		log.Println(err)
+		return false, err
+	}
+	res.Body.Close()
+
+	if res.StatusCode > 299 {
+		log.Printf("Response failed with status code: %d and\nbody: %s\n",
+			res.StatusCode, body)
+		return false, err
+	}
+
+	var info infoAboutLibGitHub
+	err = json.Unmarshal(body, &info)
+	if err != nil {
+		log.Println(err)
+		return false, err
+	}
+
+	v1, err := version.NewVersion(currVersion)
+	v2, err := version.NewVersion(info.TagName)
+	if v1.LessThan(v2) {
+		return true, nil
+	}
+
+	return false, nil
+}
+
+type infoAboutLibGitHub struct {
+	TagName string `json:"tag_name"`
+}
