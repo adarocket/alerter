@@ -4,7 +4,7 @@ import (
 	"embed"
 	"github.com/adarocket/alerter/internal"
 	"github.com/adarocket/alerter/internal/config"
-	"github.com/adarocket/alerter/internal/database/controller"
+	"github.com/adarocket/alerter/internal/controller"
 	"github.com/adarocket/alerter/internal/database/model"
 	"log"
 )
