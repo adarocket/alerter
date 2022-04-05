@@ -11,6 +11,7 @@ const (
 	LessT           = TypeChek(6)
 	EqualT          = TypeChek(7)
 	CheckCardanoVer = TypeChek(8)
+	CheckBool       = TypeChek(9)
 )
 
 var chekersTypes = map[TypeChek]string{
@@ -22,6 +23,7 @@ var chekersTypes = map[TypeChek]string{
 	LessT:           "Less",
 	EqualT:          "Equal",
 	CheckCardanoVer: "CheckCardanoVer",
+	CheckBool:       "CheckBool",
 }
 
 func (tc TypeChek) String() string {

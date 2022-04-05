@@ -156,6 +156,12 @@ func calculateDiffVal(alert model.AlertNodeAndAlert, oldValue string, value stri
 		} else {
 			return 0, nil
 		}
+	case checker.CheckBool.String():
+		diffVal, err = checker.GetIntBool(value)
+		if err != nil {
+			log.Println(err)
+			return 0, err
+		}
 	default:
 		log.Println("undefined checker type")
 		return 0, errors.New("undefined checker type")

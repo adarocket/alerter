@@ -139,3 +139,17 @@ func IsCardanoVersionOutdated(currVersion string) (bool, error) {
 type infoAboutLibGitHub struct {
 	TagName string `json:"tag_name"`
 }
+
+func GetIntBool(val string) (float64, error) {
+	currVal, err := strconv.ParseBool(val)
+	if err != nil {
+		log.Println(err)
+		return -1, err
+	}
+
+	if currVal {
+		return 1, nil
+	}
+
+	return 0, nil
+}
