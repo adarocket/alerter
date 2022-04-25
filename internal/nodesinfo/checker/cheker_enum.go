@@ -27,5 +27,5 @@ var chekersTypes = map[TypeChek]string{
 }
 
 func (tc TypeChek) String() string {
-	return chekersTypes[tc-1]
+	return chekersTypes[tc]
 }
