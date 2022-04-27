@@ -23,7 +23,10 @@ func (c *Cardano) ConnectServices(clientConn *grpc.ClientConn, dbConn *sql.DB) {
 	c.informClient = client.NewControllerClient(clientConn)
 	c.cardanoClient = client.NewCardanoClient(clientConn)
 	c.db = model.NewAlertNodeInstance(dbConn)
-	c.oldCardanoNodes = make(map[string]*cardano.SaveStatisticRequest)
+
+	if len(c.oldCardanoNodes) == 0 {
+		c.oldCardanoNodes = make(map[string]*cardano.SaveStatisticRequest)
+	}
 }
 
 func (c *Cardano) CreateInfoStatMsg() (map[msgsender.KeyMsg]msgsender.BodyMsg, error) {
