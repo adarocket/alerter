@@ -26,7 +26,7 @@ func StartTracking(loadConfig config.Config, db *sql.DB) {
 	nodeRep.ConnectNodeRepositoryServices(loadConfig)
 	for {
 		nodeRep.ProcessStatistic()
-		time.Sleep(time.Second * time.Duration(10))
+		time.Sleep(time.Second * time.Duration(loadConfig.TimeoutCheck))
 		nodeRep.ConnectNodeRepositoryServices(loadConfig)
 	}
 }
