@@ -20,11 +20,15 @@ func authMw(c *gin.Context) {
 	if len(cookies) < 1 {
 		getAuthHandler(c)
 		c.Abort()
+		return
 	} else {
 		if isValid := IsValidToken(cookies[0].Value); !isValid {
-			c.Redirect(http.StatusFound, c.Request.URL.Host+"/auth")
+			getAuthHandler(c)
 			c.Abort()
+
 		}
+
+		return
 	}
 }
 
@@ -47,7 +51,8 @@ func StartServer(webServerAddr string) {
 	}
 	alertNodeGroup := router.Group("/alertNode")
 	{
-		alertNodeGroup.GET("/:id/:uuid/edit", alertNodeController.GetAlertNodeByIDAndUuid)
+		//alertNodeGroup.GET("/:id/:uuid/edit", alertNodeController.GetAlertNodeByIDAndUuid)
+		alertNodeGroup.GET("/:id/edit", alertNodeController.getAlertNodesListByID)
 		alertNodeGroup.POST("/edit", alertNodeController.updateAlertNode)
 		alertNodeGroup.GET("/create", alertNodeController.getEmptyAlertNodeTmpl)
 		alertNodeGroup.POST("/create", alertNodeController.createAlertNode)
